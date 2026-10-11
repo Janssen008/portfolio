@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initSamplesManager();
   initReviewsManager();
   initProofsManager();
-  initFaqsManager();
   initBackupManager();
 });
 
@@ -67,21 +66,6 @@ function loadDataAndPopulate() {
   document.getElementById('brandInstagram').value = currentData.brand.instagram || '';
   document.getElementById('brandTwitter').value = currentData.brand.twitter || '';
 
-  // Multipliers
-  const m = currentData.multipliers;
-  document.getElementById('multStandard').value = m.speed.standard.mult;
-  document.getElementById('multExpress').value = m.speed.express.mult;
-  document.getElementById('multRush').value = m.speed.rush.mult;
-  document.getElementById('multOvernight').value = m.speed.overnight.mult;
-
-  document.getElementById('multLevelHighSchool').value = m.level.highschool.mult;
-  document.getElementById('multLevelCollege').value = m.level.college.mult;
-  document.getElementById('multLevelPostgrad').value = m.level.postgrad.mult;
-
-  document.getElementById('addonCitationsPhp').value = m.addons.citationsPhp;
-  document.getElementById('addonNotesPhp').value = m.addons.speakerNotesPhp;
-  document.getElementById('addonQueuePhp').value = m.addons.rushQueuePhp;
-
   // Toggle label change
   document.getElementById('statusIsOpen').addEventListener('change', (e) => {
     document.getElementById('statusToggleLabel').textContent = e.target.checked ? 'COMMISSIONS OPEN' : 'COMMISSIONS CLOSED';
@@ -92,7 +76,6 @@ function loadDataAndPopulate() {
   renderSamplesList();
   renderReviewsList();
   renderProofsList();
-  renderFaqsList();
 }
 
 // --- Tab Switching ---
@@ -104,11 +87,9 @@ function initTabs() {
   const titles = {
     tabStatus: 'Commission Status & Announcements',
     tabServices: 'Services & Pricing Management',
-    tabCalculator: 'Calculator Multipliers & Surcharges',
     tabSamples: 'Portfolio Samples Management',
     tabReviews: 'Student Reviews & Testimonials',
     tabProofs: 'Proof of Payment & Client Receipts',
-    tabFaqs: 'FAQs & Policies Management',
     tabBackup: 'Backup, Export & Factory Reset'
   };
 
@@ -157,20 +138,6 @@ function collectFormValues() {
   currentData.brand.telegram = document.getElementById('brandTelegram').value;
   currentData.brand.instagram = document.getElementById('brandInstagram').value;
   currentData.brand.twitter = document.getElementById('brandTwitter').value;
-
-  // Multipliers
-  currentData.multipliers.speed.standard.mult = parseFloat(document.getElementById('multStandard').value) || 1.0;
-  currentData.multipliers.speed.express.mult = parseFloat(document.getElementById('multExpress').value) || 1.35;
-  currentData.multipliers.speed.rush.mult = parseFloat(document.getElementById('multRush').value) || 1.70;
-  currentData.multipliers.speed.overnight.mult = parseFloat(document.getElementById('multOvernight').value) || 2.10;
-
-  currentData.multipliers.level.highschool.mult = parseFloat(document.getElementById('multLevelHighSchool').value) || 0.90;
-  currentData.multipliers.level.college.mult = parseFloat(document.getElementById('multLevelCollege').value) || 1.0;
-  currentData.multipliers.level.postgrad.mult = parseFloat(document.getElementById('multLevelPostgrad').value) || 1.40;
-
-  currentData.multipliers.addons.citationsPhp = parseInt(document.getElementById('addonCitationsPhp').value) || 120;
-  currentData.multipliers.addons.speakerNotesPhp = parseInt(document.getElementById('addonNotesPhp').value) || 40;
-  currentData.multipliers.addons.rushQueuePhp = parseInt(document.getElementById('addonQueuePhp').value) || 200;
 }
 
 // --- Services CRUD ---
@@ -495,54 +462,6 @@ function initProofsManager() {
     if (previewBox) previewBox.style.display = 'none';
 
     showToast('Proof of payment uploaded & added to website slider! 🌸');
-  });
-}
-
-// --- FAQs Manager ---
-function renderFaqsList() {
-  const container = document.getElementById('faqsListContainer');
-  if (!container) return;
-
-  container.innerHTML = currentData.faqs.map((f, idx) => `
-    <div class="admin-item-row">
-      <div class="item-info-col">
-        <h5>${f.question}</h5>
-        <span style="display: block; max-width: 500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-          ${f.answer}
-        </span>
-      </div>
-      <div class="item-actions-col">
-        <button class="btn btn-danger btn-sm" onclick="window.deleteFaq(${idx})">🗑️</button>
-      </div>
-    </div>
-  `).join('');
-
-  window.deleteFaq = (idx) => {
-    if (confirm('Delete this FAQ item?')) {
-      currentData.faqs.splice(idx, 1);
-      saveStoreData(currentData);
-      renderFaqsList();
-      showToast('FAQ deleted.');
-    }
-  };
-}
-
-function initFaqsManager() {
-  document.getElementById('addNewFaqBtn')?.addEventListener('click', () => {
-    const question = prompt('FAQ Question:');
-    if (!question) return;
-    const answer = prompt('FAQ Answer:');
-    if (!answer) return;
-
-    currentData.faqs.push({
-      id: `faq_${Date.now()}`,
-      question,
-      answer
-    });
-
-    saveStoreData(currentData);
-    renderFaqsList();
-    showToast('FAQ item added ♡');
   });
 }
 

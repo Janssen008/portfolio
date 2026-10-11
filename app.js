@@ -7,17 +7,14 @@ let store = getStoreData();
 const appState = {
   currency: 'PHP', // 'PHP' or 'USD'
   fxRate: 0.018,   // 1 PHP ~ 0.018 USD
-  soundEnabled: true,
-  currentEstimate: null
+  soundEnabled: true
 };
 
 document.addEventListener('DOMContentLoaded', () => {
   renderDynamicContent();
   initMobileNav();
   initCurrencyToggle();
-  initCalculator();
   initServicesFilter();
-  initFaqAccordion();
   initModalHandling();
   initSamplePreviews();
   initAudioFeedback();
@@ -26,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('soleil-store-updated', (e) => {
     store = e.detail;
     renderDynamicContent();
-    calculateQuote();
     showToast('Website content updated in real-time ♡');
   });
 
@@ -34,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'soleil_comms_data') {
       store = getStoreData();
       renderDynamicContent();
-      calculateQuote();
     }
   });
 });
@@ -83,15 +78,12 @@ function renderDynamicContent() {
   // 3. Render Services Grid
   renderServicesGrid();
 
-  // 4. Update Calculator Service Options
-  populateCalculatorServices();
+  // 4. Update Booking Modal Service Options
+  populateBookingModalServices();
 
   // 5. Render Reviews & Payment Proofs
   renderReviewsSection();
   renderProofsCarousel();
-
-  // 6. Render FAQs
-  renderFaqsSection();
 }
 
 // --- Render Services Grid ---
@@ -143,21 +135,9 @@ function renderServicesGrid() {
   });
 }
 
-// --- Populate Calculator Select ---
-function populateCalculatorServices() {
-  const select = document.getElementById('calcServiceSelect');
+// --- Populate Booking Modal Dropdown ---
+function populateBookingModalServices() {
   const modalSelect = document.getElementById('modalServiceType');
-
-  if (select && store.services) {
-    const prevVal = select.value;
-    select.innerHTML = store.services.map(s => `
-      <option value="${s.id}">${s.icon || '📖'} ${s.name} (from ${formatMoney(s.pricePhp)}/${s.unit})</option>
-    `).join('');
-    if (prevVal && store.services.some(s => s.id === prevVal)) {
-      select.value = prevVal;
-    }
-  }
-
   if (modalSelect && store.services) {
     modalSelect.innerHTML = store.services.map(s => `
       <option value="${s.id}">${s.name}</option>
@@ -276,26 +256,6 @@ function renderProofsCarousel() {
   });
 }
 
-// --- Render FAQs Section ---
-function renderFaqsSection() {
-  const container = document.querySelector('.faq-accordion');
-  if (!container || !store.faqs) return;
-
-  container.innerHTML = store.faqs.map((f, idx) => `
-    <div class="faq-item ${idx === 0 ? 'active' : ''}">
-      <button class="faq-trigger">
-        <span>${f.question}</span>
-        <span class="faq-icon-arrow">▾</span>
-      </button>
-      <div class="faq-content">
-        ${f.answer}
-      </div>
-    </div>
-  `).join('');
-
-  initFaqAccordion();
-}
-
 // --- Mobile Navigation ---
 function initMobileNav() {
   const toggleBtn = document.getElementById('mobileToggle');
@@ -327,7 +287,6 @@ function initCurrencyToggle() {
         appState.currency = selected;
         currencyBtns.forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
-        calculateQuote();
         updateDisplayPrices();
         showToast(`Currency updated to ${selected} ♡`);
       }
@@ -352,155 +311,6 @@ function updateDisplayPrices() {
   });
 }
 
-// --- Interactive Price Calculator ---
-function initCalculator() {
-  const serviceSelect = document.getElementById('calcServiceSelect');
-  const qtyMinus = document.getElementById('calcQtyMinus');
-  const qtyPlus = document.getElementById('calcQtyPlus');
-  const qtyInput = document.getElementById('calcQtyValue');
-  const qtyUnitLabel = document.getElementById('calcQtyUnit');
-  const levelSelect = document.getElementById('calcLevelSelect');
-  const speedRadios = document.querySelectorAll('input[name="calcSpeed"]');
-  const addonChecks = document.querySelectorAll('.calc-addon-check');
-  const copyQuoteBtn = document.getElementById('copyQuoteBtn');
-  const bookWithQuoteBtn = document.getElementById('bookWithQuoteBtn');
-
-  if (!serviceSelect || !qtyInput) return;
-
-  function updateQtyUnit() {
-    const sKey = serviceSelect.value;
-    const sData = (store.services && store.services.find(s => s.id === sKey)) || store.services[0];
-    if (qtyUnitLabel && sData) {
-      qtyUnitLabel.textContent = (sData.unit || 'unit') + '(s)';
-    }
-  }
-
-  serviceSelect.addEventListener('change', () => {
-    const sKey = serviceSelect.value;
-    const sData = store.services.find(s => s.id === sKey);
-    if (sData) {
-      qtyInput.value = sData.defaultQty || 3;
-      updateQtyUnit();
-      calculateQuote();
-    }
-  });
-
-  qtyMinus?.addEventListener('click', () => {
-    const current = parseInt(qtyInput.value) || 1;
-    const sData = store.services.find(s => s.id === serviceSelect.value) || store.services[0];
-    if (current > (sData?.minQty || 1)) {
-      qtyInput.value = current - 1;
-      calculateQuote();
-      playCuteSound(380);
-    }
-  });
-
-  qtyPlus?.addEventListener('click', () => {
-    const current = parseInt(qtyInput.value) || 1;
-    qtyInput.value = current + 1;
-    calculateQuote();
-    playCuteSound(440);
-  });
-
-  qtyInput.addEventListener('input', calculateQuote);
-  levelSelect?.addEventListener('change', calculateQuote);
-
-  speedRadios.forEach(radio => {
-    radio.addEventListener('change', () => {
-      document.querySelectorAll('.speed-option-card').forEach(card => card.classList.remove('selected'));
-      radio.closest('.speed-option-card')?.classList.add('selected');
-      calculateQuote();
-      playCuteSound(520);
-    });
-  });
-
-  addonChecks.forEach(check => {
-    check.addEventListener('change', () => {
-      calculateQuote();
-      playCuteSound(480);
-    });
-  });
-
-  copyQuoteBtn?.addEventListener('click', () => {
-    const quoteText = generateQuoteMessage();
-    navigator.clipboard.writeText(quoteText).then(() => {
-      showToast('Quote copied to clipboard! Paste it into your DM ♡');
-      playCuteSound(650);
-    }).catch(() => fallbackCopyText(quoteText));
-  });
-
-  bookWithQuoteBtn?.addEventListener('click', openBookingModalWithPrefill);
-
-  updateQtyUnit();
-  calculateQuote();
-}
-
-function calculateQuote() {
-  const serviceKey = document.getElementById('calcServiceSelect')?.value || (store.services[0]?.id || 'research');
-  const qty = parseInt(document.getElementById('calcQtyValue')?.value) || 3;
-  const levelKey = document.getElementById('calcLevelSelect')?.value || 'college';
-  const speedKey = document.querySelector('input[name="calcSpeed"]:checked')?.value || 'standard';
-
-  const sData = store.services?.find(s => s.id === serviceKey) || store.services[0];
-  if (!sData) return;
-
-  const mults = store.multipliers;
-  const levelData = mults.level[levelKey] || mults.level.college;
-  const speedData = mults.speed[speedKey] || mults.speed.standard;
-
-  let baseSubtotal = (sData.pricePhp || 250) * qty;
-  let levelSubtotal = baseSubtotal * (levelData.mult || 1.0);
-  let finalSubtotal = levelSubtotal * (speedData.mult || 1.0);
-
-  // Addons from store
-  let addonsTotal = 0;
-  const citationCheck = document.getElementById('addonCitations')?.checked;
-  const notesCheck = document.getElementById('addonNotes')?.checked;
-  const rushQueueCheck = document.getElementById('addonRushQueue')?.checked;
-
-  if (citationCheck) addonsTotal += (mults.addons.citationsPhp || 120);
-  if (notesCheck) addonsTotal += (serviceKey === 'presentation' ? (qty * (mults.addons.speakerNotesPhp || 40)) : 100);
-  if (rushQueueCheck) addonsTotal += (mults.addons.rushQueuePhp || 200);
-
-  const grandTotalPhp = finalSubtotal + addonsTotal;
-
-  // Update displays
-  const totalDisplay = document.getElementById('calcGrandTotal');
-  const breakdownService = document.getElementById('breakdownService');
-  const breakdownSpeed = document.getElementById('breakdownSpeed');
-  const breakdownLevel = document.getElementById('breakdownLevel');
-  const breakdownAddons = document.getElementById('breakdownAddons');
-
-  if (totalDisplay) totalDisplay.textContent = formatMoney(grandTotalPhp);
-  if (breakdownService) breakdownService.textContent = `${sData.name} (${qty} ${sData.unit}${qty > 1 ? 's' : ''}) - ${formatMoney(baseSubtotal)}`;
-  if (breakdownSpeed) breakdownSpeed.textContent = `${speedData.label} (${speedData.mult}x)`;
-  if (breakdownLevel) breakdownLevel.textContent = `${levelData.label} (${levelData.mult}x)`;
-  if (breakdownAddons) breakdownAddons.textContent = addonsTotal > 0 ? `+${formatMoney(addonsTotal)}` : 'Included Free / None';
-
-  appState.currentEstimate = {
-    service: sData.name,
-    qty: `${qty} ${sData.unit}${qty > 1 ? 's' : ''}`,
-    speed: speedData.label,
-    level: levelData.label,
-    addons: addonsTotal > 0,
-    total: formatMoney(grandTotalPhp),
-    totalPhp: grandTotalPhp
-  };
-}
-
-function generateQuoteMessage() {
-  const est = appState.currentEstimate;
-  if (!est) return 'Hello Soleil Comms! I would like to inquire about academic commission rates.';
-
-  return `🌸 Soleil Comms Commission Inquiry 🌸
-• Service: ${est.service}
-• Quantity/Pages: ${est.qty}
-• Academic Level: ${est.level}
-• Target Deadline: ${est.speed}
-• Estimated Total: ~${est.total}
-• Status: Ready to book! Could you please confirm slot availability? Thank you! ♡`;
-}
-
 // --- Services Filtering ---
 function initServicesFilter() {
   const filterBtns = document.querySelectorAll('.filter-btn[data-filter]');
@@ -522,23 +332,6 @@ function initServicesFilter() {
       });
       playCuteSound(400);
     });
-  });
-}
-
-// --- FAQ Accordion ---
-function initFaqAccordion() {
-  const faqItems = document.querySelectorAll('.faq-item');
-  faqItems.forEach(item => {
-    const trigger = item.querySelector('.faq-trigger');
-    if (!trigger) return;
-    trigger.onclick = () => {
-      const isActive = item.classList.contains('active');
-      faqItems.forEach(i => i.classList.remove('active'));
-      if (!isActive) {
-        item.classList.add('active');
-        playCuteSound(360);
-      }
-    };
   });
 }
 
@@ -592,15 +385,6 @@ function openBookingModal(preselectedServiceKey) {
     orderModal.classList.add('open');
     document.body.style.overflow = 'hidden';
     playCuteSound(480);
-  }
-}
-
-function openBookingModalWithPrefill() {
-  openBookingModal();
-  const notesField = document.getElementById('modalOrderNotes');
-  if (notesField && appState.currentEstimate) {
-    const est = appState.currentEstimate;
-    notesField.value = `[Calculator Estimate]: ${est.service} | ${est.qty} | Urgency: ${est.speed} | Est: ${est.total}`;
   }
 }
 
@@ -681,9 +465,7 @@ function fallbackCopyText(text) {
 
 // --- Sound Synthesizer ---
 let audioCtx = null;
-function initAudioFeedback() {
-  // Silent fallback
-}
+function initAudioFeedback() {}
 
 function playCuteSound(freq = 440) {
   if (!appState.soundEnabled) return;

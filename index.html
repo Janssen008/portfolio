@@ -36,11 +36,8 @@
       <nav>
         <ul class="nav-menu" id="navMenu">
           <li><a href="#services" class="nav-link">Services</a></li>
-          <li><a href="#calculator" class="nav-link">Rate Estimator</a></li>
           <li><a href="#samples" class="nav-link">Sample Works</a></li>
-          <li><a href="#process" class="nav-link">How It Works</a></li>
           <li><a href="#reviews" class="nav-link">Reviews</a></li>
-          <li><a href="#faq" class="nav-link">FAQ & Policy</a></li>
           <li><a href="admin.html" class="nav-link" style="color: var(--primary); font-weight: 800;">🔒 Admin</a></li>
           <li class="mobile-only-action" style="display: none;">
             <button class="btn btn-primary open-order-modal">✨ Inquire / Book a Slot</button>
@@ -110,9 +107,6 @@
               <button class="btn btn-primary btn-lg open-order-modal" id="heroOrderBtn">
                 <span>✨ Book a Slot / Send Inquiry</span>
               </button>
-              <a href="#calculator" class="btn btn-secondary btn-lg" id="heroCalcBtn">
-                <span>🧮 Estimate My Rate</span>
-              </a>
               <a href="#samples" class="btn btn-secondary btn-lg" id="heroSamplesBtn">
                 <span>📂 View Portfolio</span>
               </a>
@@ -423,151 +417,6 @@
       </div>
     </section>
 
-    <!-- Interactive Rate Estimator / Price Calculator -->
-    <section class="calculator-section" id="calculator">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-tag">Instant Quote</span>
-          <h2 class="section-title">Transparent Rate Estimator 🧮</h2>
-          <p class="section-subtitle">
-            Calculate an upfront estimate in seconds based on your page count, deadline, and required service. No hidden fees!
-          </p>
-        </div>
-
-        <div class="calc-wrapper">
-          <!-- Form Left -->
-          <div class="calc-form-pane">
-            
-            <div class="calc-form-group">
-              <label for="calcServiceSelect" class="calc-label">1. Select Service Type:</label>
-              <select id="calcServiceSelect" class="calc-select">
-                <option value="research">📖 Research Paper / Thesis (from ₱350/page)</option>
-                <option value="essay">📝 Essay / Reflection Paper (from ₱250/page)</option>
-                <option value="presentation">💻 PowerPoint Presentation (from ₱150/slide)</option>
-                <option value="editing">✏️ Editing & Proofreading (from ₱120/page)</option>
-                <option value="searching">🔍 Research Sourcing & Matrix (from ₱150/source)</option>
-                <option value="report">📋 Report / Case Study (from ₱280/page)</option>
-              </select>
-            </div>
-
-            <div class="calc-form-group">
-              <label class="calc-label">2. Quantity / Volume:</label>
-              <div class="stepper-row">
-                <button type="button" class="stepper-btn" id="calcQtyMinus">−</button>
-                <input type="number" id="calcQtyValue" class="calc-input" value="5" min="1" max="100" style="width: 80px; text-align: center;">
-                <button type="button" class="stepper-btn" id="calcQtyPlus">+</button>
-                <span id="calcQtyUnit" style="font-weight: 700; color: var(--text-muted);">pages</span>
-              </div>
-            </div>
-
-            <div class="calc-form-group">
-              <label for="calcLevelSelect" class="calc-label">3. Academic Level:</label>
-              <select id="calcLevelSelect" class="calc-select">
-                <option value="highschool">Junior / Senior High School (Standard)</option>
-                <option value="college" selected>College / Undergraduate Level</option>
-                <option value="postgrad">Post-Graduate / Masteral Level</option>
-              </select>
-            </div>
-
-            <div class="calc-form-group">
-              <label class="calc-label">4. Deadline / Urgency:</label>
-              <div class="speed-options-grid">
-                <label class="speed-option-card selected">
-                  <input type="radio" name="calcSpeed" value="standard" checked>
-                  <div class="speed-option-title">🌸 Standard</div>
-                  <div class="speed-option-subtitle">4 to 7 Days (Regular rate)</div>
-                </label>
-
-                <label class="speed-option-card">
-                  <input type="radio" name="calcSpeed" value="express">
-                  <div class="speed-option-title">🏃 Express</div>
-                  <div class="speed-option-subtitle">48 Hours (+35%)</div>
-                </label>
-
-                <label class="speed-option-card">
-                  <input type="radio" name="calcSpeed" value="rush">
-                  <div class="speed-option-title">⚡ Super Rush</div>
-                  <div class="speed-option-subtitle">24 Hours (+70%)</div>
-                </label>
-
-                <label class="speed-option-card">
-                  <input type="radio" name="calcSpeed" value="overnight">
-                  <div class="speed-option-title">🚨 Overnight</div>
-                  <div class="speed-option-subtitle">&lt;12 Hours Urgent</div>
-                </label>
-              </div>
-            </div>
-
-            <div class="calc-form-group">
-              <label class="calc-label">5. Optional Add-ons:</label>
-              <div class="addons-list">
-                <label class="addon-checkbox-label">
-                  <input type="checkbox" id="addonTurnitin" checked disabled>
-                  <span>Turnitin Plagiarism & AI Similarity Scan <strong>(FREE / Included)</strong></span>
-                </label>
-                <label class="addon-checkbox-label">
-                  <input type="checkbox" class="calc-addon-check" id="addonCitations">
-                  <span>Annotated Bibliography & Complete Reference Pack (+₱120)</span>
-                </label>
-                <label class="addon-checkbox-label">
-                  <input type="checkbox" class="calc-addon-check" id="addonNotes">
-                  <span>Detailed Oral Presentation Cue Cards / Speaker Notes</span>
-                </label>
-                <label class="addon-checkbox-label">
-                  <input type="checkbox" class="calc-addon-check" id="addonRushQueue">
-                  <span>VIP Priority Queue Lock (+₱200)</span>
-                </label>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Results Right -->
-          <div class="calc-results-card">
-            <div>
-              <div class="calc-estimate-header">
-                <h3>Estimated Investment</h3>
-                <span style="font-size: 0.8rem; color: var(--primary); font-weight: 700;">Student-Friendly Pricing Guaranteed</span>
-              </div>
-
-              <div class="calc-total-box">
-                <div class="total-number" id="calcGrandTotal">₱1,750</div>
-                <div class="total-disclaimer">*Final quote verified upon reviewing rubric & prompt</div>
-              </div>
-
-              <div class="quote-breakdown">
-                <div class="breakdown-line">
-                  <span>Base Scope:</span>
-                  <span id="breakdownService" class="bold">Research Paper (5 pages)</span>
-                </div>
-                <div class="breakdown-line">
-                  <span>Academic Level:</span>
-                  <span id="breakdownLevel" class="bold">College</span>
-                </div>
-                <div class="breakdown-line">
-                  <span>Delivery Speed:</span>
-                  <span id="breakdownSpeed" class="bold">Standard (1.0x)</span>
-                </div>
-                <div class="breakdown-line">
-                  <span>Selected Add-ons:</span>
-                  <span id="breakdownAddons" class="bold">Free Scan Included</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="calc-actions">
-              <button type="button" class="btn btn-primary" id="copyQuoteBtn">
-                <span>📋 Copy Quote to Clipboard</span>
-              </button>
-              <button type="button" class="btn btn-secondary" id="bookWithQuoteBtn">
-                <span>💖 Pre-fill Booking Form</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Sample Works / Portfolio Section -->
     <section class="portfolio-section" id="samples">
       <div class="container">
@@ -690,53 +539,6 @@
       </div>
     </section>
 
-    <!-- How It Works / Process Section -->
-    <section class="process-section" id="process">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-tag">Stress-Free Ordering</span>
-          <h2 class="section-title">How To Commission in 4 Easy Steps ♡</h2>
-          <p class="section-subtitle">
-            Smooth, collaborative, and completely transparent from initial prompt to final submission.
-          </p>
-        </div>
-
-        <div class="process-steps-grid">
-          <div class="process-step-card">
-            <div class="step-num-bubble">1</div>
-            <h4 class="step-card-title">Send Details & Rubric</h4>
-            <p class="step-card-desc">
-              Send me your instructions, guidelines, rubrics, target page length, and required deadline via direct message.
-            </p>
-          </div>
-
-          <div class="process-step-card">
-            <div class="step-num-bubble">2</div>
-            <h4 class="step-card-title">Quote & Slot Lock</h4>
-            <p class="step-card-desc">
-              Receive a fixed price quote. Settle a 50% downpayment via GCash, Maya, Bank Transfer, or PayPal to guarantee your slot.
-            </p>
-          </div>
-
-          <div class="process-step-card">
-            <div class="step-num-bubble">3</div>
-            <h4 class="step-card-title">Drafting & Updates</h4>
-            <p class="step-card-desc">
-              Work begins right away. You receive outline check-ins or progress previews so you know your paper is on the right track!
-            </p>
-          </div>
-
-          <div class="process-step-card">
-            <div class="step-num-bubble">4</div>
-            <h4 class="step-card-title">Delivery & Free Edits</h4>
-            <p class="step-card-desc">
-              Receive the finalized editable files + Turnitin verification scan. Enjoy 3 days of free minor revisions for total peace of mind.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Student Reviews / Testimonials -->
     <section class="reviews-section" id="reviews">
       <div class="container">
@@ -828,73 +630,6 @@
       </div>
     </section>
 
-    <!-- FAQ & Policies Section -->
-    <section class="faq-section" id="faq">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-tag">Got Questions?</span>
-          <h2 class="section-title">Frequently Asked Questions & Terms</h2>
-          <p class="section-subtitle">
-            Everything you need to know about payment methods, rush policies, and revisions.
-          </p>
-        </div>
-
-        <div class="faq-accordion">
-          
-          <div class="faq-item active">
-            <button class="faq-trigger">
-              <span>⚡ How fast can you complete a Rush Commission?</span>
-              <span class="faq-icon-arrow">▾</span>
-            </button>
-            <div class="faq-content">
-              Depending on slot capacity, rush commissions can be delivered within <strong>12 to 24 hours</strong>, and emergency overnight orders within 6 to 12 hours. Rush slots carry a small priority multiplier to compensate for immediate queue dedication.
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-trigger">
-              <span>💳 What payment methods are accepted?</span>
-              <span class="faq-icon-arrow">▾</span>
-            </button>
-            <div class="faq-content">
-              We accept <strong>GCash, Maya, BPI / BDO Online Bank Transfer</strong>, and <strong>PayPal</strong> (for international student clients). We operate on a standard 50% reservation downpayment and 50% balance upon final review.
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-trigger">
-              <span>🔄 Are revisions free of charge?</span>
-              <span class="faq-icon-arrow">▾</span>
-            </button>
-            <div class="faq-content">
-              Yes! We provide <strong>free minor revisions within 3 days (72 hours)</strong> after delivery to address professor feedback or stylistic adjustments. Major additions outside the original prompt instructions will be billed fairly.
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-trigger">
-              <span>🔒 How do you protect client privacy & confidentiality?</span>
-              <span class="faq-icon-arrow">▾</span>
-            </button>
-            <div class="faq-content">
-              Your anonymity is our utmost priority. All personal information, student identification numbers, and school headers are scrubbed. Your files and identity are never shared, published, or repurposed.
-            </div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-trigger">
-              <span>🤖 How do you ensure Plagiarism & AI-Free work?</span>
-              <span class="faq-icon-arrow">▾</span>
-            </button>
-            <div class="faq-content">
-              All papers are manually researched and drafted from scratch. Before every submission, we run comprehensive scans using premium plagiarism checkers and Turnitin AI detection algorithms. A complimentary verification PDF is provided upon request.
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
     <!-- Call to Action Banner -->
     <section class="cta-banner-section">
       <div class="container">
@@ -907,8 +642,8 @@
             <button class="btn btn-white btn-lg open-order-modal">
               <span>💌 Send Inquiries & Bookings</span>
             </button>
-            <a href="#calculator" class="btn btn-outline-white btn-lg">
-              <span>🧮 Check Pricing</span>
+            <a href="#services" class="btn btn-outline-white btn-lg">
+              <span>📋 View Services & Rates</span>
             </a>
           </div>
         </div>
@@ -951,10 +686,9 @@
           <h5>Quick Links</h5>
           <ul class="footer-links">
             <li><a href="#hero">Commission Status</a></li>
-            <li><a href="#calculator">Instant Rate Calculator</a></li>
+            <li><a href="#services">Academic Services</a></li>
             <li><a href="#samples">Portfolio Previews</a></li>
-            <li><a href="#process">How It Works</a></li>
-            <li><a href="#faq">Terms & Revisions</a></li>
+            <li><a href="#reviews">Student Reviews & Proofs</a></li>
             <li><a href="admin.html" style="color: var(--primary); font-weight: 800;">🔒 Owner Admin Dashboard</a></li>
           </ul>
         </div>
