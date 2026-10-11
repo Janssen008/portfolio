@@ -1,6 +1,1 @@
-﻿{
-  "rewrites": [
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/admin/", "destination": "/admin.html" }
-  ]
-}
+﻿{"version":2,"routes":[{"src":"/admin","dest":"/admin.html"},{"src":"/admin/","dest":"/admin.html"}]}
