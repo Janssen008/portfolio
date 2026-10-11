@@ -84,6 +84,40 @@ function renderDynamicContent() {
   // 5. Render Reviews & Payment Proofs
   renderReviewsSection();
   renderProofsCarousel();
+
+  // 6. Render Portfolio Samples Grid
+  renderSamplesGrid();
+
+  // 7. Render Proof of Transaction Carousel
+  renderTransactionsCarousel();
+
+  // 8. Update all social links from store (real-time from admin)
+  updateSocialLinks();
+}
+
+// --- Update Social Links from Store ---
+function updateSocialLinks() {
+  const b = store.brand;
+  if (!b) return;
+
+  const setLink = (id, href, isEmail = false) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.href = isEmail ? `mailto:${href}` : (href || '#');
+  };
+
+  // Footer icons
+  setLink('footerSocialInstagram', b.instagram);
+  setLink('footerSocialTwitter', b.twitter);
+  setLink('footerSocialTelegram', b.telegram);
+  setLink('footerSocialFacebook', b.facebook);
+  setLink('footerSocialEmail', b.email, true);
+
+  // Contact section DM buttons
+  setLink('contactSocialInstagram', b.instagram);
+  setLink('contactSocialTwitter', b.twitter);
+  setLink('contactSocialTelegram', b.telegram);
+  setLink('contactSocialFacebook', b.facebook);
 }
 
 // --- Render Services Grid ---
@@ -237,20 +271,123 @@ function renderProofsCarousel() {
     updateActiveDot(activeIdx);
   };
 
-  // Click-to-preview lightbox modal
+  // Click-to-preview proof lightbox modal
   track.querySelectorAll('.proof-img-wrap, .inspect-proof-btn').forEach(el => {
     el.onclick = (e) => {
       const pid = e.currentTarget.dataset.proofId;
       const proof = store.proofs.find(p => p.id === pid);
       if (proof) {
-        showPreviewModal({
-          title: proof.title,
-          tag: proof.tag || 'Proof of Payment',
-          img: proof.img,
-          description: proof.caption,
-          grade: `Transaction Amount: ${proof.amount || 'Verified'}`,
-          deliverables: 'Client Confidentiality Verified • Anonymized Receipt'
-        });
+        showProofLightbox(proof);
+      }
+    };
+  });
+}
+
+// --- Render Portfolio Samples Grid ---
+function renderSamplesGrid() {
+  const grid = document.getElementById('samplesGrid');
+  if (!grid || !store.samples) return;
+
+  if (store.samples.length === 0) {
+    grid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px 0;">No portfolio samples uploaded yet.</p>';
+    return;
+  }
+
+  grid.innerHTML = store.samples.map(s => `
+    <div class="sample-card open-preview-btn" data-sample-id="${s.id}" style="cursor: pointer;">
+      <div class="sample-media-wrap">
+        <img src="${s.img}" alt="${s.title}" class="sample-img" loading="lazy">
+        <span class="sample-badge">${s.tag}</span>
+      </div>
+      <div class="sample-body">
+        <div class="sample-meta">
+          <span>${s.meta || s.tag}</span> • <span>${s.grade || 'Verified'}</span>
+        </div>
+        <h4 class="sample-title">${s.title}</h4>
+        <p class="sample-desc">${s.description}</p>
+        <button class="btn btn-secondary btn-sm" style="margin-top: auto;">🔍 Inspect Sample Details</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// --- Render Proofs of Transaction (Client Chats) Carousel ---
+function renderTransactionsCarousel() {
+  const track = document.getElementById('txSliderTrack');
+  const dotsRow = document.getElementById('txDotsRow');
+  const prevBtn = document.getElementById('txPrevBtn');
+  const nextBtn = document.getElementById('txNextBtn');
+
+  if (!track || !store.transactions || store.transactions.length === 0) return;
+
+  track.innerHTML = store.transactions.map((t, idx) => `
+    <div class="proof-card" data-index="${idx}">
+      <div class="proof-img-wrap" data-tx-id="${t.id}">
+        <img src="${t.img}" alt="${t.title}" class="proof-img" loading="lazy">
+        <span class="proof-amount-badge">${t.status || 'Verified Chat'}</span>
+        <span class="proof-verified-pill">💬 ${t.tag || 'Client Feedback'}</span>
+      </div>
+      <div class="proof-content">
+        <h4 class="proof-title">${t.title}</h4>
+        <p class="proof-caption">${t.caption}</p>
+        <button class="btn btn-secondary btn-sm inspect-tx-btn" data-tx-id="${t.id}" style="margin-top: auto;">
+          🔍 View Conversation
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  // Render Dots
+  if (dotsRow) {
+    dotsRow.innerHTML = store.transactions.map((_, idx) => `
+      <div class="carousel-dot ${idx === 0 ? 'active' : ''}" data-index="${idx}"></div>
+    `).join('');
+
+    dotsRow.querySelectorAll('.carousel-dot').forEach(dot => {
+      dot.onclick = () => {
+        const idx = parseInt(dot.dataset.index);
+        const cards = track.querySelectorAll('.proof-card');
+        if (cards[idx]) {
+          cards[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+          updateTxDot(idx);
+        }
+      };
+    });
+  }
+
+  function updateTxDot(activeIndex) {
+    if (!dotsRow) return;
+    dotsRow.querySelectorAll('.carousel-dot').forEach((dot, idx) => {
+      dot.classList.toggle('active', idx === activeIndex);
+    });
+  }
+
+  // Prev / Next button listeners
+  if (prevBtn) {
+    prevBtn.onclick = () => {
+      track.scrollBy({ left: -320, behavior: 'smooth' });
+    };
+  }
+  if (nextBtn) {
+    nextBtn.onclick = () => {
+      track.scrollBy({ left: 320, behavior: 'smooth' });
+    };
+  }
+
+  // Scroll spy to update dots
+  track.onscroll = () => {
+    const cardWidth = track.querySelector('.proof-card')?.offsetWidth || 300;
+    const activeIdx = Math.round(track.scrollLeft / cardWidth);
+    updateTxDot(activeIdx);
+  };
+
+  // Click-to-preview transaction lightbox modal
+  track.querySelectorAll('.proof-img-wrap, .inspect-tx-btn').forEach(el => {
+    el.onclick = (e) => {
+      const tid = e.currentTarget.dataset.txId;
+      const tx = store.transactions.find(t => t.id === tid);
+      if (tx) {
+        showTransactionLightbox(tx);
       }
     };
   });
@@ -339,15 +476,33 @@ function initServicesFilter() {
 function initModalHandling() {
   const orderModal = document.getElementById('orderModal');
   const previewModal = document.getElementById('previewModal');
+  const proofLightbox = document.getElementById('proofLightboxModal');
+  const txLightbox = document.getElementById('txLightboxModal');
+  const termsModal = document.getElementById('termsModal');
   const closeBtns = document.querySelectorAll('.modal-close-btn');
 
   document.querySelectorAll('.open-order-modal').forEach(btn => {
-    btn.addEventListener('click', () => openBookingModal());
+    btn.addEventListener('click', () => {
+      closeAllModals();
+      openBookingModal();
+    });
+  });
+
+  document.querySelectorAll('.open-terms-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openTermsModal();
+    });
   });
 
   closeBtns.forEach(btn => btn.addEventListener('click', closeAllModals));
+  document.getElementById('closeTermsBtn')?.addEventListener('click', closeAllModals);
 
-  [orderModal, previewModal].forEach(modal => {
+  // Lightbox close buttons
+  document.getElementById('proofLightboxClose')?.addEventListener('click', closeAllModals);
+  document.getElementById('txLightboxClose')?.addEventListener('click', closeAllModals);
+
+  [orderModal, previewModal, proofLightbox, txLightbox, termsModal].forEach(modal => {
     modal?.addEventListener('click', (e) => {
       if (e.target === modal) closeAllModals();
     });
@@ -388,6 +543,15 @@ function openBookingModal(preselectedServiceKey) {
   }
 }
 
+function openTermsModal() {
+  const termsModal = document.getElementById('termsModal');
+  if (termsModal) {
+    termsModal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    playCuteSound(500);
+  }
+}
+
 function closeAllModals() {
   document.querySelectorAll('.modal-overlay').forEach(modal => modal.classList.remove('open'));
   document.body.style.overflow = '';
@@ -416,12 +580,13 @@ Looking forward to hearing from you! ♡`;
 
 // --- Sample Previews ---
 function initSamplePreviews() {
-  document.querySelectorAll('.open-preview-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const sampleId = e.currentTarget.dataset.sampleId;
-      const sample = store.samples?.find(s => s.id === sampleId) || store.samples[0];
+  document.addEventListener('click', (e) => {
+    const card = e.target.closest('.open-preview-btn');
+    if (card && card.dataset.sampleId) {
+      const sampleId = card.dataset.sampleId;
+      const sample = store.samples?.find(s => s.id === sampleId) || store.samples?.[0];
       if (sample) showPreviewModal(sample);
-    });
+    }
   });
 }
 
@@ -439,6 +604,54 @@ function showPreviewModal(data) {
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
   playCuteSound(550);
+}
+
+// --- Proof of Payment Lightbox ---
+function showProofLightbox(proof) {
+  const modal = document.getElementById('proofLightboxModal');
+  if (!modal) return;
+
+  document.getElementById('proofLightboxImg').src = proof.img;
+  document.getElementById('proofLightboxAmount').textContent = proof.amount || 'Verified ✓';
+  document.getElementById('proofLightboxTag').textContent = `✓ ${proof.tag || 'Verified Transaction'}`;
+  document.getElementById('proofLightboxTitle').textContent = proof.title;
+  document.getElementById('proofLightboxCaption').textContent = proof.caption;
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  playCuteSound(520);
+
+  // Re-attach order modal buttons inside lightbox (they may dynamically appear)
+  modal.querySelectorAll('.open-order-modal').forEach(btn => {
+    btn.onclick = () => {
+      closeAllModals();
+      setTimeout(() => openBookingModal(), 100);
+    };
+  });
+}
+
+// --- Proof of Transaction Lightbox ---
+function showTransactionLightbox(tx) {
+  const modal = document.getElementById('txLightboxModal');
+  if (!modal) return;
+
+  document.getElementById('txLightboxImg').src = tx.img;
+  document.getElementById('txLightboxStatus').textContent = tx.status || 'Verified Chat ✓';
+  document.getElementById('txLightboxTag').textContent = `✓ ${tx.tag || 'Verified Client Conversation'}`;
+  document.getElementById('txLightboxTitle').textContent = tx.title;
+  document.getElementById('txLightboxCaption').textContent = tx.caption;
+  document.getElementById('txLightboxService').textContent = tx.service || 'Academic Writing & Research';
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  playCuteSound(530);
+
+  modal.querySelectorAll('.open-order-modal').forEach(btn => {
+    btn.onclick = () => {
+      closeAllModals();
+      setTimeout(() => openBookingModal(), 100);
+    };
+  });
 }
 
 // --- Toast Feedback ---

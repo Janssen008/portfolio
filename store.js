@@ -20,6 +20,7 @@ const DEFAULT_STORE_DATA = {
     instagram: 'https://instagram.com',
     twitter: 'https://x.com',
     telegram: 'https://t.me',
+    facebook: 'https://facebook.com/yourprofile',
     phone: 'Available on DMs 24/7'
   },
 
@@ -261,6 +262,28 @@ const DEFAULT_STORE_DATA = {
       tag: 'Verified Transaction • Bank Transfer',
       img: 'assets/proof_2.jpg'
     }
+  ],
+
+  // 9. Proof of Transaction (Client Chat Proofs)
+  transactions: [
+    {
+      id: 'tx-1',
+      title: 'Literature Synthesis & Turnitin Confirmation',
+      caption: 'Client confirmed receiving paper draft, passed with strict professor and 0% AI similarity.',
+      service: 'Academic Research Paper',
+      status: 'Verified High Score (A)',
+      tag: 'Instagram DM • Client Chat',
+      img: 'assets/tx_chat_1.jpg'
+    },
+    {
+      id: 'tx-2',
+      title: 'PowerPoint Deck Delivery & Feedback',
+      caption: 'Client praised the clean slide aesthetic, speaker notes, and fast turnaround for their report.',
+      service: 'Presentation Deck & Notes',
+      status: 'Delivered Early • 5/5 Stars',
+      tag: 'Chat DM • Verified Feedback',
+      img: 'assets/tx_chat_2.jpg'
+    }
   ]
 };
 
@@ -274,7 +297,8 @@ export function getStoreData() {
     return {
       ...DEFAULT_STORE_DATA,
       ...parsed,
-      proofs: (parsed.proofs && parsed.proofs.length > 0) ? parsed.proofs : DEFAULT_STORE_DATA.proofs
+      proofs: (parsed.proofs && parsed.proofs.length > 0) ? parsed.proofs : DEFAULT_STORE_DATA.proofs,
+      transactions: (parsed.transactions && parsed.transactions.length > 0) ? parsed.transactions : DEFAULT_STORE_DATA.transactions
     };
   } catch (err) {
     console.warn('Error reading from localStorage, using default data:', err);

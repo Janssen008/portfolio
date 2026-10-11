@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initSamplesManager();
   initReviewsManager();
   initProofsManager();
+  initTransactionsManager();
+  initContactInfoManager();
   initBackupManager();
 });
 
@@ -76,6 +78,7 @@ function loadDataAndPopulate() {
   renderSamplesList();
   renderReviewsList();
   renderProofsList();
+  renderTransactionsList();
 }
 
 // --- Tab Switching ---
@@ -90,6 +93,8 @@ function initTabs() {
     tabSamples: 'Portfolio Samples Management',
     tabReviews: 'Student Reviews & Testimonials',
     tabProofs: 'Proof of Payment & Client Receipts',
+    tabTransactions: 'Proof of Transaction & Client Chats',
+    tabContact: 'Contact & Social DM Handles',
     tabBackup: 'Backup, Export & Factory Reset'
   };
 
@@ -249,14 +254,22 @@ function renderSamplesList() {
   const container = document.getElementById('samplesListContainer');
   if (!container) return;
 
+  if (currentData.samples.length === 0) {
+    container.innerHTML = '<p style="text-align:center; color: var(--admin-text-muted); padding: 20px 0;">No portfolio samples yet. Upload your first work above!</p>';
+    return;
+  }
+
   container.innerHTML = currentData.samples.map((s, idx) => `
-    <div class="admin-item-row">
-      <div class="item-info-col">
-        <h5>${s.title}</h5>
-        <span>${s.tag} • ${s.grade}</span>
+    <div class="admin-item-row" style="align-items: center;">
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <img src="${s.img}" alt="${s.title}" style="width: 64px; height: 64px; border-radius: 8px; object-fit: cover; border: 1.5px solid var(--admin-border); flex-shrink: 0;">
+        <div class="item-info-col">
+          <h5>${s.title}</h5>
+          <span>${s.tag} • ${s.grade}</span>
+        </div>
       </div>
       <div class="item-actions-col">
-        <button class="btn btn-danger btn-sm" onclick="window.deleteSample(${idx})">🗑️</button>
+        <button class="btn btn-danger btn-sm" onclick="window.deleteSample(${idx})">🗑️ Delete</button>
       </div>
     </div>
   `).join('');
@@ -272,26 +285,86 @@ function renderSamplesList() {
 }
 
 function initSamplesManager() {
-  document.getElementById('addNewSampleBtn')?.addEventListener('click', () => {
-    const title = prompt('Enter sample title:');
-    if (!title) return;
-    const tag = prompt('Enter category tag (e.g. Research Paper / Slide Deck):', 'Academic Writing');
-    const grade = prompt('Enter grade / award label:', 'Grade: 98/100 (A+)');
+  let uploadedSampleBase64 = '';
 
-    currentData.samples.push({
+  const fileInput = document.getElementById('sampleFileInput');
+  const previewBox = document.getElementById('sampleUploadPreview');
+  const previewImg = document.getElementById('samplePreviewImg');
+  const form = document.getElementById('uploadSampleForm');
+
+  // Handle image file selection with canvas compression
+  fileInput?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxDim = 1200;
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
+          else { w = Math.round((w * maxDim) / h); h = maxDim; }
+        }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        uploadedSampleBase64 = canvas.toDataURL('image/jpeg', 0.88);
+
+        if (previewImg && previewBox) {
+          previewImg.src = uploadedSampleBase64;
+          previewBox.style.display = 'block';
+        }
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Handle form submit
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    if (!uploadedSampleBase64) {
+      alert('Please select an image file of your work first.');
+      return;
+    }
+
+    const title = document.getElementById('sampleNewTitle').value.trim();
+    const tag = document.getElementById('sampleNewTag').value.trim();
+    const grade = document.getElementById('sampleNewGrade').value.trim();
+    const deliverables = document.getElementById('sampleNewDeliverables').value.trim();
+    const desc = document.getElementById('sampleNewDesc').value.trim();
+
+    if (!title || !tag) {
+      alert('Please enter at least the work title and category tag.');
+      return;
+    }
+
+    const newSample = {
       id: `sample_${Date.now()}`,
       title,
-      tag: tag || 'Sample Work',
-      img: 'assets/paper_mockup.jpg',
-      meta: 'Academic Delivery',
-      description: 'Custom academic requirement completed with distinction.',
-      grade: grade || 'Grade: 98/100',
-      deliverables: 'Complete DOCX, Turnitin Verification Scan'
-    });
+      tag,
+      img: uploadedSampleBase64,
+      meta: tag,
+      description: desc || 'Custom academic requirement completed with distinction.',
+      grade: grade || 'Grade: Received',
+      deliverables: deliverables || 'Complete deliverables provided to client'
+    };
+
+    if (!currentData.samples) currentData.samples = [];
+    currentData.samples.unshift(newSample); // Add to the top
 
     saveStoreData(currentData);
     renderSamplesList();
-    showToast('New sample work added ♡');
+
+    // Reset form
+    form.reset();
+    uploadedSampleBase64 = '';
+    if (previewBox) previewBox.style.display = 'none';
+
+    showToast('Sample work uploaded & added to portfolio! 📂');
   });
 }
 
@@ -465,6 +538,127 @@ function initProofsManager() {
   });
 }
 
+// --- Proof of Transaction (Client Chats) Manager ---
+function renderTransactionsList() {
+  const container = document.getElementById('txListContainer');
+  if (!container || !currentData.transactions) return;
+
+  if (currentData.transactions.length === 0) {
+    container.innerHTML = '<p style="text-align:center; color: var(--admin-text-muted); padding: 20px 0;">No proof of transaction screenshots uploaded yet. Upload your first conversation proof above!</p>';
+    return;
+  }
+
+  container.innerHTML = currentData.transactions.map((t, idx) => `
+    <div class="admin-item-row" style="align-items: center;">
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <img src="${t.img}" alt="${t.title}" style="width: 58px; height: 58px; border-radius: 8px; object-fit: cover; border: 1.5px solid var(--admin-border); flex-shrink: 0;">
+        <div class="item-info-col">
+          <h5>${t.title} <span style="color: var(--admin-primary); font-weight: 700; margin-left: 6px; font-size: 0.8rem;">[${t.status || 'Verified'}]</span></h5>
+          <span>${t.tag} • ${t.service || 'Commission'} • "${t.caption}"</span>
+        </div>
+      </div>
+      <div class="item-actions-col">
+        <button class="btn btn-danger btn-sm" onclick="window.deleteTransaction(${idx})">🗑️ Delete</button>
+      </div>
+    </div>
+  `).join('');
+
+  window.deleteTransaction = (idx) => {
+    if (confirm('Delete this proof of transaction record?')) {
+      currentData.transactions.splice(idx, 1);
+      saveStoreData(currentData);
+      renderTransactionsList();
+      showToast('Proof of transaction deleted.');
+    }
+  };
+}
+
+function initTransactionsManager() {
+  let uploadedTxBase64 = '';
+
+  const fileInput = document.getElementById('txFileInput');
+  const previewBox = document.getElementById('txUploadPreview');
+  const previewImg = document.getElementById('txPreviewImg');
+  const form = document.getElementById('uploadTxForm');
+
+  fileInput?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxDim = 1200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        uploadedTxBase64 = canvas.toDataURL('image/jpeg', 0.88);
+
+        if (previewImg && previewBox) {
+          previewImg.src = uploadedTxBase64;
+          previewBox.style.display = 'block';
+        }
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    if (!uploadedTxBase64) {
+      alert('Please select an image file first (screenshot of client conversation).');
+      return;
+    }
+
+    const title = document.getElementById('txNewTitle').value.trim();
+    const tag = document.getElementById('txNewTag').value.trim();
+    const status = document.getElementById('txNewStatus').value.trim();
+    const service = document.getElementById('txNewService').value.trim();
+    const caption = document.getElementById('txNewCaption').value.trim();
+
+    const newTx = {
+      id: `tx_${Date.now()}`,
+      title: title || 'Verified Client Conversation',
+      tag: tag || 'Chat DM • Verified',
+      status: status || 'Verified Chat ✓',
+      service: service || 'Academic Writing & Research',
+      caption: caption || 'Client confirmed prompt delivery and satisfaction.',
+      img: uploadedTxBase64
+    };
+
+    if (!currentData.transactions) currentData.transactions = [];
+    currentData.transactions.unshift(newTx);
+
+    saveStoreData(currentData);
+    renderTransactionsList();
+
+    form.reset();
+    uploadedTxBase64 = '';
+    if (previewBox) previewBox.style.display = 'none';
+
+    showToast('Proof of transaction uploaded & added to showcase! 🌸');
+  });
+}
+
 // --- Backup & Restore ---
 function initBackupManager() {
   const exportBtn = document.getElementById('exportJsonBtn');
@@ -523,4 +717,106 @@ function showToast(msg) {
   adminToastTimer = setTimeout(() => {
     toast.classList.remove('show');
   }, 3000);
+}
+
+// --- Contact Info Manager ---
+function initContactInfoManager() {
+  renderContactPreview();
+  syncContactFormFields();
+
+  // Open quick-edit modal
+  document.getElementById('openContactModalBtn')?.addEventListener('click', () => {
+    syncModalFromData();
+    document.getElementById('contactInfoModal').classList.add('active');
+  });
+
+  // Save from modal
+  document.getElementById('saveContactModalBtn')?.addEventListener('click', () => {
+    currentData.brand.email     = document.getElementById('modalContactEmail').value.trim();
+    currentData.brand.telegram  = document.getElementById('modalContactTelegram').value.trim();
+    currentData.brand.instagram = document.getElementById('modalContactInstagram').value.trim();
+    currentData.brand.twitter   = document.getElementById('modalContactTwitter').value.trim();
+    currentData.brand.facebook  = document.getElementById('modalContactFacebook').value.trim();
+    currentData.brand.phone     = document.getElementById('modalContactPhone').value.trim();
+    saveStoreData(currentData);
+    syncContactFormFields();
+    renderContactPreview();
+    document.getElementById('contactInfoModal').classList.remove('active');
+    showToast('Contact info updated! Live site refreshed ♡');
+  });
+
+  // Save from inline form button
+  document.getElementById('saveContactBtn')?.addEventListener('click', () => {
+    currentData.brand.email     = document.getElementById('contactEmail').value.trim();
+    currentData.brand.telegram  = document.getElementById('contactTelegram').value.trim();
+    currentData.brand.instagram = document.getElementById('contactInstagram').value.trim();
+    currentData.brand.twitter   = document.getElementById('contactTwitter').value.trim();
+    currentData.brand.facebook  = document.getElementById('contactFacebook').value.trim();
+    currentData.brand.phone     = document.getElementById('contactPhone').value.trim();
+    saveStoreData(currentData);
+    renderContactPreview();
+    showToast('Contact info saved! ♡');
+  });
+
+  // Close modal on overlay click or cancel btn
+  const modal = document.getElementById('contactInfoModal');
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+    modal.querySelectorAll('.modal-cancel-btn').forEach(btn => {
+      btn.addEventListener('click', () => modal.classList.remove('active'));
+    });
+  }
+}
+
+function syncContactFormFields() {
+  const b = currentData.brand;
+  const el = (id) => document.getElementById(id);
+  if(el('contactEmail'))     el('contactEmail').value     = b.email || '';
+  if(el('contactTelegram'))  el('contactTelegram').value  = b.telegram || '';
+  if(el('contactInstagram')) el('contactInstagram').value = b.instagram || '';
+  if(el('contactTwitter'))   el('contactTwitter').value   = b.twitter || '';
+  if(el('contactFacebook'))  el('contactFacebook').value  = b.facebook || '';
+  if(el('contactPhone'))     el('contactPhone').value     = b.phone || '';
+}
+
+function syncModalFromData() {
+  const b = currentData.brand;
+  document.getElementById('modalContactEmail').value     = b.email || '';
+  document.getElementById('modalContactTelegram').value  = b.telegram || '';
+  document.getElementById('modalContactInstagram').value = b.instagram || '';
+  document.getElementById('modalContactTwitter').value   = b.twitter || '';
+  document.getElementById('modalContactFacebook').value  = b.facebook || '';
+  document.getElementById('modalContactPhone').value     = b.phone || '';
+}
+
+function renderContactPreview() {
+  const container = document.getElementById('contactInfoPreview');
+  if (!container) return;
+  const b = currentData.brand;
+  const items = [
+    { icon: '📧', label: 'Email', value: b.email || '—', href: b.email ? `mailto:${b.email}` : null },
+    { icon: '✈️', label: 'Telegram', value: b.telegram || '—', href: b.telegram || null },
+    { icon: '📸', label: 'Instagram', value: b.instagram || '—', href: b.instagram || null },
+    { icon: '🐦', label: 'Twitter / X', value: b.twitter || '—', href: b.twitter || null },
+    { icon: '📘', label: 'Personal FB', value: b.facebook || '—', href: b.facebook || null },
+    { icon: '📱', label: 'Availability', value: b.phone || '—', href: null },
+  ];
+  container.innerHTML = `
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 4px;">
+      ${items.map(item => `
+        <div style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 12px; padding: 16px 18px; display: flex; align-items: flex-start; gap: 12px;">
+          <div style="font-size: 1.4rem; flex-shrink: 0; margin-top: 2px;">${item.icon}</div>
+          <div style="min-width: 0;">
+            <div style="font-size: 0.75rem; color: var(--admin-text-muted); margin-bottom: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">${item.label}</div>
+            ${item.href
+              ? `<a href="${item.href}" target="_blank" style="font-size: 0.88rem; color: var(--admin-primary); word-break: break-all; font-weight: 500;">${item.value}</a>`
+              : `<span style="font-size: 0.88rem; color: var(--admin-text); word-break: break-all;">${item.value}</span>`
+            }
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
 }

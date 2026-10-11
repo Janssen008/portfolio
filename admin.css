@@ -8,6 +8,7 @@
   --admin-bg: #faf5f7;
   --admin-sidebar: #ffffff;
   --admin-card: #ffffff;
+  --admin-surface: #fff8fa;
   --admin-border: #ffd5df;
   --admin-text: #3d232b;
   --admin-text-muted: #825e69;
@@ -452,4 +453,13 @@ body {
   .admin-main {
     padding: 18px;
   }
+}
+
+/* --- Contact Info Preview --- */
+.contact-info-preview {
+  /* grid is inline styled from JS */
+}
+
+.admin-surface {
+  background: var(--admin-primary-soft);
 }
