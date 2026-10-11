@@ -1,0 +1,455 @@
+/* Soleil Comms - Admin Dashboard Styles */
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+  --admin-primary: #ff5c8a;
+  --admin-primary-hover: #e03a6c;
+  --admin-primary-soft: #fff0f3;
+  --admin-bg: #faf5f7;
+  --admin-sidebar: #ffffff;
+  --admin-card: #ffffff;
+  --admin-border: #ffd5df;
+  --admin-text: #3d232b;
+  --admin-text-muted: #825e69;
+  --admin-success: #2ec4b6;
+  --admin-warning: #ffb703;
+  --admin-danger: #e63946;
+  --radius: 12px;
+  --shadow: 0 4px 18px rgba(255, 92, 138, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  display: flex;
+  min-height: 100vh;
+}
+
+/* PIN Screen */
+.pin-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(61, 35, 43, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pin-card {
+  background: #ffffff;
+  border: 2px solid var(--admin-border);
+  border-radius: 20px;
+  padding: 36px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.pin-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  margin-bottom: 14px;
+  border: 2px solid var(--admin-primary);
+}
+
+.pin-title {
+  font-family: 'Comfortaa', cursive;
+  font-size: 1.4rem;
+  color: var(--admin-primary);
+  margin-bottom: 6px;
+}
+
+.pin-subtitle {
+  font-size: 0.88rem;
+  color: var(--admin-text-muted);
+  margin-bottom: 20px;
+}
+
+.pin-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--admin-border);
+  border-radius: 10px;
+  font-size: 1.1rem;
+  text-align: center;
+  letter-spacing: 4px;
+  margin-bottom: 16px;
+  outline: none;
+}
+
+.pin-input:focus {
+  border-color: var(--admin-primary);
+}
+
+/* Admin Layout */
+.admin-sidebar {
+  width: 260px;
+  background: var(--admin-sidebar);
+  border-right: 2px solid var(--admin-border);
+  padding: 24px 18px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  flex-shrink: 0;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--admin-text);
+  margin-bottom: 28px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.sidebar-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--admin-primary);
+}
+
+.sidebar-brand-name {
+  font-family: 'Comfortaa', cursive;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--admin-primary);
+}
+
+.sidebar-nav {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-grow: 1;
+}
+
+.sidebar-btn {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--admin-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+}
+
+.sidebar-btn:hover, .sidebar-btn.active {
+  background: var(--admin-primary-soft);
+  color: var(--admin-primary);
+}
+
+.sidebar-footer {
+  padding-top: 18px;
+  border-top: 1px solid var(--admin-border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-main {
+  flex-grow: 1;
+  padding: 32px;
+  max-width: 1100px;
+  overflow-y: auto;
+}
+
+/* Header */
+.admin-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.admin-page-title {
+  font-family: 'Comfortaa', cursive;
+  font-size: 1.8rem;
+  color: #3d232b;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Cards & Sections */
+.admin-tab-pane {
+  display: none;
+}
+.admin-tab-pane.active {
+  display: block;
+}
+
+.admin-card {
+  background: var(--admin-card);
+  border: 2px solid var(--admin-border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+}
+
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.card-title {
+  font-family: 'Comfortaa', cursive;
+  font-size: 1.25rem;
+  color: #3d232b;
+}
+
+/* Form Controls */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #3d232b;
+  margin-bottom: 6px;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--admin-border);
+  border-radius: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  color: var(--admin-text);
+  outline: none;
+  background: #ffffff;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--admin-primary);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 18px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: var(--admin-primary);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: var(--admin-primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: var(--admin-primary);
+  border: 1.5px solid var(--admin-border);
+}
+
+.btn-secondary:hover {
+  background: var(--admin-primary-soft);
+}
+
+.btn-danger {
+  background: var(--admin-danger);
+  color: #ffffff;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+/* Dynamic Item Lists / Tables */
+.admin-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  background: #fffbfa;
+}
+
+.item-info-col h5 {
+  font-size: 0.98rem;
+  color: #3d232b;
+  margin-bottom: 2px;
+}
+
+.item-info-col span {
+  font-size: 0.82rem;
+  color: var(--admin-text-muted);
+}
+
+.item-actions-col {
+  display: flex;
+  gap: 8px;
+}
+
+/* Switch Toggle */
+.switch-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.switch-input {
+  width: 40px;
+  height: 22px;
+  appearance: none;
+  background: #e0d0d5;
+  border-radius: 20px;
+  position: relative;
+  outline: none;
+  cursor: pointer;
+  transition: background 0.25s;
+}
+
+.switch-input:checked {
+  background: var(--admin-success);
+}
+
+.switch-input::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: transform 0.25s;
+}
+
+.switch-input:checked::before {
+  transform: translateX(18px);
+}
+
+/* Toast */
+.admin-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #2b141d;
+  color: #ffffff;
+  padding: 12px 20px;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 10000;
+}
+
+.admin-toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Modal */
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s;
+}
+
+.admin-modal-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.admin-modal-box {
+  background: #ffffff;
+  border: 2px solid var(--admin-border);
+  border-radius: 16px;
+  padding: 28px;
+  width: 100%;
+  max-width: 550px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  body {
+    flex-direction: column;
+  }
+  .admin-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .admin-main {
+    padding: 18px;
+  }
+}

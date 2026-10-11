@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soleil Comms ♡ Admin Dashboard</title>
+  <link rel="icon" type="image/jpeg" href="assets/avatar.jpg">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+  <!-- Optional Security PIN Gate Screen -->
+  <div class="pin-overlay" id="pinOverlay" style="display: none;">
+    <div class="pin-card">
+      <img src="assets/avatar.jpg" alt="Soleil" class="pin-avatar">
+      <h2 class="pin-title">Soleil Comms Admin</h2>
+      <p class="pin-subtitle">Enter your Admin PIN to manage website content</p>
+      <input type="password" id="pinInput" class="pin-input" placeholder="••••" maxlength="8">
+      <button class="btn btn-primary" id="pinSubmitBtn" style="width: 100%; padding: 12px;">Unlock Dashboard 🌸</button>
+      <p style="font-size: 0.76rem; color: var(--admin-text-muted); margin-top: 14px;">
+        Default PIN: <strong>soleil</strong> (or click Unlock to continue)
+      </p>
+    </div>
+  </div>
+
+  <!-- Admin Sidebar -->
+  <aside class="admin-sidebar">
+    <a href="index.html" class="sidebar-brand">
+      <img src="assets/avatar.jpg" alt="Soleil" class="sidebar-avatar">
+      <div>
+        <div class="sidebar-brand-name">Soleil Admin ♡</div>
+        <div style="font-size: 0.72rem; color: var(--admin-text-muted);">Content Studio v1.0</div>
+      </div>
+    </a>
+
+    <ul class="sidebar-nav">
+      <li><button class="sidebar-btn active" data-tab="tabStatus"><span>📌</span> Status & Banner</button></li>
+      <li><button class="sidebar-btn" data-tab="tabServices"><span>🛍️</span> Services & Rates</button></li>
+      <li><button class="sidebar-btn" data-tab="tabCalculator"><span>🧮</span> Calculator Multipliers</button></li>
+      <li><button class="sidebar-btn" data-tab="tabSamples"><span>📂</span> Portfolio Samples</button></li>
+      <li><button class="sidebar-btn" data-tab="tabReviews"><span>💖</span> Student Reviews</button></li>
+      <li><button class="sidebar-btn" data-tab="tabProofs"><span>🧾</span> Proof of Payment</button></li>
+      <li><button class="sidebar-btn" data-tab="tabFaqs"><span>❓</span> FAQs & Policies</button></li>
+      <li><button class="sidebar-btn" data-tab="tabBackup"><span>⚙️</span> Backup & Export</button></li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <a href="index.html" target="_blank" class="btn btn-secondary" style="width: 100%;">
+        <span>🌐 View Live Site</span>
+      </a>
+      <button class="btn btn-primary" id="sidebarSaveBtn" style="width: 100%;">
+        <span>💾 Save All Changes</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="admin-main">
+    <header class="admin-topbar">
+      <div>
+        <h1 class="admin-page-title" id="pageHeading">Commission Status & Announcements</h1>
+        <p style="font-size: 0.88rem; color: var(--admin-text-muted);">Manage real-time content displayed to visiting students and clients.</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary" id="topSaveBtn">💾 Save Changes</button>
+      </div>
+    </header>
+
+    <!-- Tab 1: Status & Announcement -->
+    <section class="admin-tab-pane active" id="tabStatus">
+      <div class="admin-card">
+        <div class="card-header-row">
+          <h3 class="card-title">Live Availability Toggle</h3>
+          <label class="switch-label">
+            <input type="checkbox" id="statusIsOpen" class="switch-input" checked>
+            <span id="statusToggleLabel">COMMISSIONS OPEN</span>
+          </label>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Status Pill Text (Header):</label>
+            <input type="text" id="statusPillText" class="form-input" value="SLOTS OPEN">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Slots Remaining Counter:</label>
+            <input type="text" id="statusSlotsRemaining" class="form-input" value="4 / 5 Slots Available">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Top Notice Bar Announcement (Scrolling Bar):</label>
+          <input type="text" id="statusNoticeText" class="form-input" value="✨ COMMISSIONS ARE OPEN! Accepting Rush & Non-Rush Slots for Upcoming Deadlines & Finals! 🌸">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hero Headline Title:</label>
+          <input type="text" id="statusHeadline" class="form-input" value="ACADEMIC COMMS ARE OPEN! ♡">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hero Description Subtext:</label>
+          <textarea id="statusHeroDesc" class="form-textarea" rows="3"></textarea>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3 class="card-title" style="margin-bottom: 16px;">Contact & Social DM Handles</h3>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Support Email:</label>
+            <input type="email" id="brandEmail" class="form-input" value="soleilcomms@gmail.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Telegram Link / Username:</label>
+            <input type="text" id="brandTelegram" class="form-input" value="https://t.me">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Instagram Link:</label>
+            <input type="text" id="brandInstagram" class="form-input" value="https://instagram.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Twitter / X Link:</label>
+            <input type="text" id="brandTwitter" class="form-input" value="https://x.com">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 2: Services & Rates -->
+    <section class="admin-tab-pane" id="tabServices">
+      <div class="admin-card">
+        <div class="card-header-row">
+          <div>
+            <h3 class="card-title">Academic Services Catalog</h3>
+            <p style="font-size: 0.85rem; color: var(--admin-text-muted);">Edit base prices, turnaround descriptions, or add new academic offerings.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" id="addNewServiceBtn">➕ Add New Service</button>
+        </div>
+
+        <div id="servicesListContainer">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 3: Calculator Multipliers -->
+    <section class="admin-tab-pane" id="tabCalculator">
+      <div class="admin-card">
+        <h3 class="card-title" style="margin-bottom: 16px;">Turnaround Multipliers</h3>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Standard Delivery Multiplier (Default 1.0):</label>
+            <input type="number" step="0.05" id="multStandard" class="form-input" value="1.0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Express 48h Multiplier:</label>
+            <input type="number" step="0.05" id="multExpress" class="form-input" value="1.35">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Super Rush 24h Multiplier:</label>
+            <input type="number" step="0.05" id="multRush" class="form-input" value="1.70">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Overnight Emergency (&lt;12h) Multiplier:</label>
+            <input type="number" step="0.05" id="multOvernight" class="form-input" value="2.10">
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3 class="card-title" style="margin-bottom: 16px;">Academic Level Multipliers</h3>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Junior / Senior High School Multiplier:</label>
+            <input type="number" step="0.05" id="multLevelHighSchool" class="form-input" value="0.90">
+          </div>
+          <div class="form-group">
+            <label class="form-label">College / Undergrad Multiplier:</label>
+            <input type="number" step="0.05" id="multLevelCollege" class="form-input" value="1.0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Post-Graduate / Masters Multiplier:</label>
+            <input type="number" step="0.05" id="multLevelPostgrad" class="form-input" value="1.40">
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3 class="card-title" style="margin-bottom: 16px;">Add-on Surcharges (₱ PHP)</h3>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Reference Pack & Citations (₱):</label>
+            <input type="number" id="addonCitationsPhp" class="form-input" value="120">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Speaker Notes (per slide ₱):</label>
+            <input type="number" id="addonNotesPhp" class="form-input" value="40">
+          </div>
+          <div class="form-group">
+            <label class="form-label">VIP Rush Queue Lock (₱):</label>
+            <input type="number" id="addonQueuePhp" class="form-input" value="200">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 4: Portfolio Samples -->
+    <section class="admin-tab-pane" id="tabSamples">
+      <div class="admin-card">
+        <div class="card-header-row">
+          <div>
+            <h3 class="card-title">Portfolio Showcase Items</h3>
+            <p style="font-size: 0.85rem; color: var(--admin-text-muted);">Manage sample work cards shown to prospective clients.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" id="addNewSampleBtn">➕ Add Sample Work</button>
+        </div>
+        <div id="samplesListContainer">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 5: Reviews & Testimonials -->
+    <section class="admin-tab-pane" id="tabReviews">
+      <div class="admin-card">
+        <div class="card-header-row">
+          <div>
+            <h3 class="card-title">Client Reviews & Testimonials</h3>
+            <p style="font-size: 0.85rem; color: var(--admin-text-muted);">Manage student praise and reviews displayed on the website.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" id="addNewReviewBtn">➕ Add Review</button>
+        </div>
+        <div id="reviewsListContainer">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab: Proof of Payment -->
+    <section class="admin-tab-pane" id="tabProofs">
+      <div class="admin-card">
+        <h3 class="card-title" style="margin-bottom: 8px;">Upload New Proof of Payment Receipt 📸</h3>
+        <p style="font-size: 0.85rem; color: var(--admin-text-muted); margin-bottom: 20px;">
+          Upload screenshots of transaction slips (GCash, Maya, Bank Transfer) to display on your public client slider.
+        </p>
+
+        <form id="uploadProofForm">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Select Receipt Picture (From Phone / PC):</label>
+              <input type="file" id="proofFileInput" accept="image/*" class="form-input">
+              <div id="proofUploadPreview" style="display: none; margin-top: 10px; width: 100%; max-width: 220px; height: 180px; border-radius: 8px; overflow: hidden; border: 2px dashed var(--admin-primary);">
+                <img src="" id="proofPreviewImg" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+            </div>
+
+            <div>
+              <div class="form-group">
+                <label class="form-label">Receipt Title:</label>
+                <input type="text" id="proofNewTitle" class="form-input" placeholder="e.g. GCash Downpayment - Thesis Paper" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Transaction Amount Display:</label>
+                <input type="text" id="proofNewAmount" class="form-input" placeholder="e.g. ₱1,450.00" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Verification Tag / Channel:</label>
+              <input type="text" id="proofNewTag" class="form-input" placeholder="e.g. Verified Transaction • GCash" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Caption / Description:</label>
+              <input type="text" id="proofNewCaption" class="form-input" placeholder="e.g. 50% Slot Reservation - College Research" required>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 12px;">
+            <button type="submit" class="btn btn-primary" id="submitProofBtn">
+              <span>➕ Upload & Add to Website Slider</span> ♡
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="admin-card">
+        <div class="card-header-row">
+          <div>
+            <h3 class="card-title">Current Proof of Payment Slips</h3>
+            <p style="font-size: 0.85rem; color: var(--admin-text-muted);">Receipts currently displaying in your client reviews carousel.</p>
+          </div>
+        </div>
+        <div id="proofsListContainer">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 6: FAQs -->
+    <section class="admin-tab-pane" id="tabFaqs">
+      <div class="admin-card">
+        <div class="card-header-row">
+          <div>
+            <h3 class="card-title">Frequently Asked Questions</h3>
+            <p style="font-size: 0.85rem; color: var(--admin-text-muted);">Manage client questions on revisions, payment, and rush policies.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" id="addNewFaqBtn">➕ Add FAQ</button>
+        </div>
+        <div id="faqsListContainer">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 7: Backup & Export -->
+    <section class="admin-tab-pane" id="tabBackup">
+      <div class="admin-card">
+        <h3 class="card-title" style="margin-bottom: 14px;">Export & Backup Website Data</h3>
+        <p style="font-size: 0.88rem; color: var(--admin-text-muted); margin-bottom: 16px;">
+          Download your entire website content, services, prices, and reviews as a portable JSON file.
+        </p>
+        <button class="btn btn-secondary" id="exportJsonBtn">📥 Export JSON Backup</button>
+      </div>
+
+      <div class="admin-card">
+        <h3 class="card-title" style="margin-bottom: 14px;">Import Data from Backup</h3>
+        <p style="font-size: 0.88rem; color: var(--admin-text-muted); margin-bottom: 16px;">
+          Paste or upload an exported JSON backup to restore previous website configurations.
+        </p>
+        <textarea id="importJsonTextarea" class="form-textarea" rows="4" placeholder="Paste JSON backup text here..."></textarea>
+        <button class="btn btn-primary" id="importJsonBtn" style="margin-top: 10px;">📤 Restore from JSON</button>
+      </div>
+
+      <div class="admin-card" style="border-color: #ffccd5;">
+        <h3 class="card-title" style="color: var(--admin-danger); margin-bottom: 12px;">Reset to Original Defaults</h3>
+        <p style="font-size: 0.88rem; color: var(--admin-text-muted); margin-bottom: 16px;">
+          Reset all services, prices, and testimonials to the default Soleil Comms theme data.
+        </p>
+        <button class="btn btn-danger" id="resetDefaultsBtn">⚠️ Reset to Factory Defaults</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Edit Service Modal -->
+  <div class="admin-modal-overlay" id="editServiceModal">
+    <div class="admin-modal-box">
+      <h3 class="card-title" id="serviceModalTitle" style="margin-bottom: 16px;">Edit Academic Service</h3>
+      <input type="hidden" id="modalServiceId">
+      
+      <div class="form-group">
+        <label class="form-label">Service Name:</label>
+        <input type="text" id="modalServiceName" class="form-input" required>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Icon Emoji:</label>
+          <input type="text" id="modalServiceIcon" class="form-input" placeholder="📖" style="font-size: 1.2rem;">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category Filter:</label>
+          <select id="modalServiceCategory" class="form-select">
+            <option value="writing">Writing & Research</option>
+            <option value="editing">Editing & Proofreading</option>
+            <option value="slides">Presentations & Slides</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Base Rate in PHP (₱):</label>
+          <input type="number" id="modalServicePrice" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Unit Type:</label>
+          <input type="text" id="modalServiceUnit" class="form-input" placeholder="page / slide / source">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Short Description:</label>
+        <textarea id="modalServiceDesc" class="form-textarea" rows="2"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Style / Format Specs:</label>
+        <input type="text" id="modalServiceFormats" class="form-input" placeholder="e.g. APA 7th, MLA, Chicago">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Turnaround Time:</label>
+        <input type="text" id="modalServiceTurnaround" class="form-input" placeholder="e.g. Standard (3-5 days) | Rush (24h)">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Badge Label (Optional):</label>
+        <input type="text" id="modalServiceBadge" class="form-input" placeholder="e.g. Most Popular / High Demand">
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button type="button" class="btn btn-secondary modal-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveServiceModalBtn">Save Service ♡</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="admin-toast" id="adminToast">
+    <span>✨</span> Changes saved successfully!
+  </div>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

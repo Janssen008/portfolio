@@ -1,0 +1,14 @@
+{
+  "name": "soleil-comms-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Soleil Comms - Responsive Academic Portfolio & Commission Booking Website",
+  "scripts": {
+    "dev": "vite --host --open",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0"
+  }
+}
