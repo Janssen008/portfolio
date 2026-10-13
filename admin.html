@@ -39,7 +39,6 @@
       <li><button class="sidebar-btn" data-tab="tabSamples"><span>📂</span> Portfolio Samples</button></li>
       <li><button class="sidebar-btn" data-tab="tabReviews"><span>💖</span> Student Reviews</button></li>
       <li><button class="sidebar-btn" data-tab="tabProofs"><span>🧾</span> Proof of Payment</button></li>
-      <li><button class="sidebar-btn" data-tab="tabTransactions"><span>💬</span> Proof of Transaction</button></li>
       <li><button class="sidebar-btn" data-tab="tabContact"><span>📞</span> Contact Info</button></li>
       <li><button class="sidebar-btn" data-tab="tabBackup"><span>⚙️</span> Backup &amp; Export</button></li>
     </ul>
@@ -101,23 +100,15 @@
       </div>
 
       <div class="admin-card">
-        <h3 class="card-title" style="margin-bottom: 16px;">Contact & Social DM Handles</h3>
+        <h3 class="card-title" style="margin-bottom: 16px;">Direct Contact Handles (Instagram &amp; Facebook)</h3>
         <div class="form-grid-2">
           <div class="form-group">
-            <label class="form-label">Support Email:</label>
-            <input type="email" id="brandEmail" class="form-input" value="soleilcomms@gmail.com">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Telegram Link / Username:</label>
-            <input type="text" id="brandTelegram" class="form-input" value="https://t.me">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Instagram Link:</label>
+            <label class="form-label">📸 Instagram Link / Handle:</label>
             <input type="text" id="brandInstagram" class="form-input" value="https://instagram.com">
           </div>
           <div class="form-group">
-            <label class="form-label">Twitter / X Link:</label>
-            <input type="text" id="brandTwitter" class="form-input" value="https://x.com">
+            <label class="form-label">📘 Facebook Link / Page:</label>
+            <input type="text" id="brandFacebook" class="form-input" value="https://facebook.com">
           </div>
         </div>
       </div>
@@ -292,84 +283,14 @@
       </div>
     </section>
 
-    <!-- Tab: Proof of Transaction -->
-    <section class="admin-tab-pane" id="tabTransactions">
-      <!-- Upload New Proof of Transaction Form (Matching the 2nd picture setup!) -->
-      <div class="admin-card">
-        <h3 class="card-title" style="margin-bottom: 8px;">Upload Proof of Transaction (Client Chat) 💬</h3>
-        <p style="font-size: 0.85rem; color: var(--admin-text-muted); margin-bottom: 20px;">
-          Upload a screenshot of your client conversation, transaction confirmation, or feedback to showcase authentic client interactions.
-        </p>
-
-        <form id="uploadTxForm">
-          <div class="form-grid-2">
-            <!-- Image Upload -->
-            <div class="form-group">
-              <label class="form-label">Select Conversation Screenshot / Chat Proof:</label>
-              <input type="file" id="txFileInput" accept="image/*" class="form-input">
-              <div id="txUploadPreview" style="display: none; margin-top: 10px; width: 100%; max-width: 260px; height: 180px; border-radius: 8px; overflow: hidden; border: 2px dashed var(--admin-primary);">
-                <img src="" id="txPreviewImg" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
-              </div>
-            </div>
-
-            <!-- Core Details -->
-            <div>
-              <div class="form-group">
-                <label class="form-label">Transaction Title / Client Reference:</label>
-                <input type="text" id="txNewTitle" class="form-input" placeholder="e.g. Qualitative Research Handover & Confirmation" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Platform / Channel Tag:</label>
-                <input type="text" id="txNewTag" class="form-input" placeholder="e.g. Instagram DM / Messenger / Telegram" required>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-grid-2">
-            <div class="form-group">
-              <label class="form-label">Grade / Transaction Status Label:</label>
-              <input type="text" id="txNewStatus" class="form-input" placeholder="e.g. Completed • Verified High Score (A)">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Deliverables / Service Type:</label>
-              <input type="text" id="txNewService" class="form-input" placeholder="e.g. Academic Research Paper • 15 Pages">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Short Description / Conversation Notes:</label>
-            <textarea id="txNewCaption" class="form-textarea" rows="3" placeholder="Brief summary of the chat transaction, client feedback, or confirmation details..."></textarea>
-          </div>
-
-          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 12px;">
-            <button type="submit" class="btn btn-primary" id="submitTxBtn">
-              <span>➕ Upload &amp; Add Proof of Transaction</span> ♡
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <!-- Current Proofs of Transaction List -->
-      <div class="admin-card">
-        <div class="card-header-row">
-          <div>
-            <h3 class="card-title">Current Proofs of Transaction</h3>
-            <p style="font-size: 0.85rem; color: var(--admin-text-muted);">Client conversation screenshots currently displayed in your public transaction showcase.</p>
-          </div>
-        </div>
-        <div id="txListContainer">
-          <!-- Rendered dynamically -->
-        </div>
-      </div>
-    </section>
 
     <!-- Tab: Contact Info -->
     <section class="admin-tab-pane" id="tabContact">
       <div class="admin-card">
         <div class="card-header-row" style="margin-bottom: 20px;">
           <div>
-            <h3 class="card-title">Contact &amp; Social DM Handles 📞</h3>
-            <p style="font-size: 0.85rem; color: var(--admin-text-muted);">Update your public contact information displayed in the footer and contact section.</p>
+            <h3 class="card-title">Direct Contact Handles 📞</h3>
+            <p style="font-size: 0.85rem; color: var(--admin-text-muted);">Manage your Instagram and Facebook direct contact links displayed on the live website.</p>
           </div>
           <button class="btn btn-primary btn-sm" id="openContactModalBtn">✏️ Quick Edit Modal</button>
         </div>
@@ -381,31 +302,15 @@
 
         <!-- Inline Edit Form -->
         <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--admin-border);">
-          <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 16px; color: var(--admin-text);">Edit Contact Details</h4>
+          <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 16px; color: var(--admin-text);">Edit Direct Contact Details</h4>
           <div class="form-grid-2">
             <div class="form-group">
-              <label class="form-label">📧 Support Email:</label>
-              <input type="email" id="contactEmail" class="form-input" placeholder="yourname@gmail.com">
-            </div>
-            <div class="form-group">
-              <label class="form-label">✈️ Telegram Link / Username:</label>
-              <input type="text" id="contactTelegram" class="form-input" placeholder="https://t.me/yourusername">
-            </div>
-            <div class="form-group">
-              <label class="form-label">📸 Instagram Link:</label>
+              <label class="form-label">📸 Instagram Link / Handle:</label>
               <input type="text" id="contactInstagram" class="form-input" placeholder="https://instagram.com/youraccount">
             </div>
             <div class="form-group">
-              <label class="form-label">🐦 Twitter / X Link:</label>
-              <input type="text" id="contactTwitter" class="form-input" placeholder="https://x.com/youraccount">
-            </div>
-            <div class="form-group">
-              <label class="form-label">📘 Personal Facebook:</label>
+              <label class="form-label">📘 Facebook Link / Page:</label>
               <input type="text" id="contactFacebook" class="form-input" placeholder="https://facebook.com/yourprofile">
-            </div>
-            <div class="form-group">
-              <label class="form-label">📱 Availability / Phone Note:</label>
-              <input type="text" id="contactPhone" class="form-input" placeholder="e.g. Available on DMs 24/7">
             </div>
           </div>
           <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
@@ -520,28 +425,12 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">📧 Support Email:</label>
-        <input type="email" id="modalContactEmail" class="form-input" placeholder="yourname@gmail.com">
-      </div>
-      <div class="form-group">
-        <label class="form-label">✈️ Telegram Link / Username:</label>
-        <input type="text" id="modalContactTelegram" class="form-input" placeholder="https://t.me/yourusername">
-      </div>
-      <div class="form-group">
-        <label class="form-label">📸 Instagram Link:</label>
+        <label class="form-label">📸 Instagram Link / Handle:</label>
         <input type="text" id="modalContactInstagram" class="form-input" placeholder="https://instagram.com/youraccount">
       </div>
       <div class="form-group">
-        <label class="form-label">🐦 Twitter / X Link:</label>
-        <input type="text" id="modalContactTwitter" class="form-input" placeholder="https://x.com/youraccount">
-      </div>
-      <div class="form-group">
-        <label class="form-label">📘 Personal Facebook:</label>
+        <label class="form-label">📘 Facebook Link / Page:</label>
         <input type="text" id="modalContactFacebook" class="form-input" placeholder="https://facebook.com/yourprofile">
-      </div>
-      <div class="form-group">
-        <label class="form-label">📱 Availability / Phone Note:</label>
-        <input type="text" id="modalContactPhone" class="form-input" placeholder="e.g. Available on DMs 24/7">
       </div>
 
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">

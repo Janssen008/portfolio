@@ -1,5 +1,5 @@
 // Soleil Comms - Interactive Web Portfolio Application (Dynamic Data Enabled)
-import { getStoreData } from './store.js';
+import { getStoreData, syncStoreWithServer, startStoreAutoSync } from './store.js';
 
 let store = getStoreData();
 
@@ -31,6 +31,19 @@ document.addEventListener('DOMContentLoaded', () => {
       store = getStoreData();
       renderDynamicContent();
     }
+  });
+
+  // Initial server fetch to sync latest admin changes to mobile/other devices
+  syncStoreWithServer((latestData) => {
+    store = latestData;
+    renderDynamicContent();
+  });
+
+  // Keep mobile view updated in real-time if modified from admin on desktop
+  startStoreAutoSync((updatedData) => {
+    store = updatedData;
+    renderDynamicContent();
+    showToast('Website content updated in real-time ♡');
   });
 });
 
@@ -88,10 +101,7 @@ function renderDynamicContent() {
   // 6. Render Portfolio Samples Grid
   renderSamplesGrid();
 
-  // 7. Render Proof of Transaction Carousel
-  renderTransactionsCarousel();
-
-  // 8. Update all social links from store (real-time from admin)
+  // 7. Update all direct contact links from store (real-time from admin)
   updateSocialLinks();
 }
 
@@ -100,23 +110,22 @@ function updateSocialLinks() {
   const b = store.brand;
   if (!b) return;
 
-  const setLink = (id, href, isEmail = false) => {
+  const setLink = (id, href) => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.href = isEmail ? `mailto:${href}` : (href || '#');
+    el.href = href || '#';
   };
 
-  // Footer icons
+  // Footer icons (Instagram & Facebook only)
   setLink('footerSocialInstagram', b.instagram);
-  setLink('footerSocialTwitter', b.twitter);
-  setLink('footerSocialTelegram', b.telegram);
   setLink('footerSocialFacebook', b.facebook);
-  setLink('footerSocialEmail', b.email, true);
 
-  // Contact section DM buttons
+  // Direct Contact links in footer
+  setLink('directContactInstagram', b.instagram);
+  setLink('directContactFacebook', b.facebook);
+
+  // Contact modal DM buttons
   setLink('contactSocialInstagram', b.instagram);
-  setLink('contactSocialTwitter', b.twitter);
-  setLink('contactSocialTelegram', b.telegram);
   setLink('contactSocialFacebook', b.facebook);
 }
 
@@ -311,87 +320,6 @@ function renderSamplesGrid() {
   `).join('');
 }
 
-// --- Render Proofs of Transaction (Client Chats) Carousel ---
-function renderTransactionsCarousel() {
-  const track = document.getElementById('txSliderTrack');
-  const dotsRow = document.getElementById('txDotsRow');
-  const prevBtn = document.getElementById('txPrevBtn');
-  const nextBtn = document.getElementById('txNextBtn');
-
-  if (!track || !store.transactions || store.transactions.length === 0) return;
-
-  track.innerHTML = store.transactions.map((t, idx) => `
-    <div class="proof-card" data-index="${idx}">
-      <div class="proof-img-wrap" data-tx-id="${t.id}">
-        <img src="${t.img}" alt="${t.title}" class="proof-img" loading="lazy">
-        <span class="proof-amount-badge">${t.status || 'Verified Chat'}</span>
-        <span class="proof-verified-pill">💬 ${t.tag || 'Client Feedback'}</span>
-      </div>
-      <div class="proof-content">
-        <h4 class="proof-title">${t.title}</h4>
-        <p class="proof-caption">${t.caption}</p>
-        <button class="btn btn-secondary btn-sm inspect-tx-btn" data-tx-id="${t.id}" style="margin-top: auto;">
-          🔍 View Conversation
-        </button>
-      </div>
-    </div>
-  `).join('');
-
-  // Render Dots
-  if (dotsRow) {
-    dotsRow.innerHTML = store.transactions.map((_, idx) => `
-      <div class="carousel-dot ${idx === 0 ? 'active' : ''}" data-index="${idx}"></div>
-    `).join('');
-
-    dotsRow.querySelectorAll('.carousel-dot').forEach(dot => {
-      dot.onclick = () => {
-        const idx = parseInt(dot.dataset.index);
-        const cards = track.querySelectorAll('.proof-card');
-        if (cards[idx]) {
-          cards[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-          updateTxDot(idx);
-        }
-      };
-    });
-  }
-
-  function updateTxDot(activeIndex) {
-    if (!dotsRow) return;
-    dotsRow.querySelectorAll('.carousel-dot').forEach((dot, idx) => {
-      dot.classList.toggle('active', idx === activeIndex);
-    });
-  }
-
-  // Prev / Next button listeners
-  if (prevBtn) {
-    prevBtn.onclick = () => {
-      track.scrollBy({ left: -320, behavior: 'smooth' });
-    };
-  }
-  if (nextBtn) {
-    nextBtn.onclick = () => {
-      track.scrollBy({ left: 320, behavior: 'smooth' });
-    };
-  }
-
-  // Scroll spy to update dots
-  track.onscroll = () => {
-    const cardWidth = track.querySelector('.proof-card')?.offsetWidth || 300;
-    const activeIdx = Math.round(track.scrollLeft / cardWidth);
-    updateTxDot(activeIdx);
-  };
-
-  // Click-to-preview transaction lightbox modal
-  track.querySelectorAll('.proof-img-wrap, .inspect-tx-btn').forEach(el => {
-    el.onclick = (e) => {
-      const tid = e.currentTarget.dataset.txId;
-      const tx = store.transactions.find(t => t.id === tid);
-      if (tx) {
-        showTransactionLightbox(tx);
-      }
-    };
-  });
-}
 
 // --- Mobile Navigation ---
 function initMobileNav() {
@@ -477,7 +405,6 @@ function initModalHandling() {
   const orderModal = document.getElementById('orderModal');
   const previewModal = document.getElementById('previewModal');
   const proofLightbox = document.getElementById('proofLightboxModal');
-  const txLightbox = document.getElementById('txLightboxModal');
   const termsModal = document.getElementById('termsModal');
   const closeBtns = document.querySelectorAll('.modal-close-btn');
 
@@ -500,9 +427,8 @@ function initModalHandling() {
 
   // Lightbox close buttons
   document.getElementById('proofLightboxClose')?.addEventListener('click', closeAllModals);
-  document.getElementById('txLightboxClose')?.addEventListener('click', closeAllModals);
 
-  [orderModal, previewModal, proofLightbox, txLightbox, termsModal].forEach(modal => {
+  [orderModal, previewModal, proofLightbox, termsModal].forEach(modal => {
     modal?.addEventListener('click', (e) => {
       if (e.target === modal) closeAllModals();
     });
@@ -524,9 +450,10 @@ function initModalHandling() {
   document.getElementById('commissionInquiryForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const dmText = compileOrderFormText();
-    const mailUrl = `mailto:${store.brand?.email || 'soleilcomms@gmail.com'}?subject=Soleil%20Comms%20Inquiry&body=${encodeURIComponent(dmText)}`;
-    window.open(mailUrl, '_blank');
-    showToast('Opening email client! You can also paste copied DM to Twitter/IG ♡');
+    navigator.clipboard.writeText(dmText).then(() => {
+      showToast('Formatted DM copied! Send directly to Soleil via Instagram or Facebook ♡');
+      playCuteSound(600);
+    }).catch(() => fallbackCopyText(dmText));
   });
 }
 
@@ -630,29 +557,6 @@ function showProofLightbox(proof) {
   });
 }
 
-// --- Proof of Transaction Lightbox ---
-function showTransactionLightbox(tx) {
-  const modal = document.getElementById('txLightboxModal');
-  if (!modal) return;
-
-  document.getElementById('txLightboxImg').src = tx.img;
-  document.getElementById('txLightboxStatus').textContent = tx.status || 'Verified Chat ✓';
-  document.getElementById('txLightboxTag').textContent = `✓ ${tx.tag || 'Verified Client Conversation'}`;
-  document.getElementById('txLightboxTitle').textContent = tx.title;
-  document.getElementById('txLightboxCaption').textContent = tx.caption;
-  document.getElementById('txLightboxService').textContent = tx.service || 'Academic Writing & Research';
-
-  modal.classList.add('open');
-  document.body.style.overflow = 'hidden';
-  playCuteSound(530);
-
-  modal.querySelectorAll('.open-order-modal').forEach(btn => {
-    btn.onclick = () => {
-      closeAllModals();
-      setTimeout(() => openBookingModal(), 100);
-    };
-  });
-}
 
 // --- Toast Feedback ---
 let toastTimeout;

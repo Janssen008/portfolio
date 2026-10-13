@@ -1,5 +1,5 @@
 // Soleil Comms - Admin Dashboard Logic
-import { getStoreData, saveStoreData, resetStoreData } from './store.js';
+import { getStoreData, saveStoreData, resetStoreData, syncStoreWithServer } from './store.js';
 
 let currentData = null;
 
@@ -12,9 +12,15 @@ document.addEventListener('DOMContentLoaded', () => {
   initSamplesManager();
   initReviewsManager();
   initProofsManager();
-  initTransactionsManager();
   initContactInfoManager();
   initBackupManager();
+
+  // Cross-device sync: push existing local changes to server so mobile devices receive them,
+  // or pull server data if newer
+  syncStoreWithServer((serverData) => {
+    currentData = serverData;
+    loadDataAndPopulate();
+  });
 });
 
 // --- PIN Screen ---
@@ -63,10 +69,8 @@ function loadDataAndPopulate() {
   document.getElementById('statusHeroDesc').value = currentData.brand.heroDescription;
 
   // Contact
-  document.getElementById('brandEmail').value = currentData.brand.email || '';
-  document.getElementById('brandTelegram').value = currentData.brand.telegram || '';
-  document.getElementById('brandInstagram').value = currentData.brand.instagram || '';
-  document.getElementById('brandTwitter').value = currentData.brand.twitter || '';
+  if (document.getElementById('brandInstagram')) document.getElementById('brandInstagram').value = currentData.brand.instagram || '';
+  if (document.getElementById('brandFacebook')) document.getElementById('brandFacebook').value = currentData.brand.facebook || '';
 
   // Toggle label change
   document.getElementById('statusIsOpen').addEventListener('change', (e) => {
@@ -78,7 +82,6 @@ function loadDataAndPopulate() {
   renderSamplesList();
   renderReviewsList();
   renderProofsList();
-  renderTransactionsList();
 }
 
 // --- Tab Switching ---
@@ -93,7 +96,6 @@ function initTabs() {
     tabSamples: 'Portfolio Samples Management',
     tabReviews: 'Student Reviews & Testimonials',
     tabProofs: 'Proof of Payment & Client Receipts',
-    tabTransactions: 'Proof of Transaction & Client Chats',
     tabContact: 'Contact & Social DM Handles',
     tabBackup: 'Backup, Export & Factory Reset'
   };
@@ -139,10 +141,8 @@ function collectFormValues() {
   currentData.brand.heroDescription = document.getElementById('statusHeroDesc').value;
 
   // Contact
-  currentData.brand.email = document.getElementById('brandEmail').value;
-  currentData.brand.telegram = document.getElementById('brandTelegram').value;
-  currentData.brand.instagram = document.getElementById('brandInstagram').value;
-  currentData.brand.twitter = document.getElementById('brandTwitter').value;
+  currentData.brand.instagram = document.getElementById('brandInstagram')?.value || '';
+  currentData.brand.facebook = document.getElementById('brandFacebook')?.value || '';
 }
 
 // --- Services CRUD ---
@@ -538,126 +538,6 @@ function initProofsManager() {
   });
 }
 
-// --- Proof of Transaction (Client Chats) Manager ---
-function renderTransactionsList() {
-  const container = document.getElementById('txListContainer');
-  if (!container || !currentData.transactions) return;
-
-  if (currentData.transactions.length === 0) {
-    container.innerHTML = '<p style="text-align:center; color: var(--admin-text-muted); padding: 20px 0;">No proof of transaction screenshots uploaded yet. Upload your first conversation proof above!</p>';
-    return;
-  }
-
-  container.innerHTML = currentData.transactions.map((t, idx) => `
-    <div class="admin-item-row" style="align-items: center;">
-      <div style="display: flex; align-items: center; gap: 14px;">
-        <img src="${t.img}" alt="${t.title}" style="width: 58px; height: 58px; border-radius: 8px; object-fit: cover; border: 1.5px solid var(--admin-border); flex-shrink: 0;">
-        <div class="item-info-col">
-          <h5>${t.title} <span style="color: var(--admin-primary); font-weight: 700; margin-left: 6px; font-size: 0.8rem;">[${t.status || 'Verified'}]</span></h5>
-          <span>${t.tag} • ${t.service || 'Commission'} • "${t.caption}"</span>
-        </div>
-      </div>
-      <div class="item-actions-col">
-        <button class="btn btn-danger btn-sm" onclick="window.deleteTransaction(${idx})">🗑️ Delete</button>
-      </div>
-    </div>
-  `).join('');
-
-  window.deleteTransaction = (idx) => {
-    if (confirm('Delete this proof of transaction record?')) {
-      currentData.transactions.splice(idx, 1);
-      saveStoreData(currentData);
-      renderTransactionsList();
-      showToast('Proof of transaction deleted.');
-    }
-  };
-}
-
-function initTransactionsManager() {
-  let uploadedTxBase64 = '';
-
-  const fileInput = document.getElementById('txFileInput');
-  const previewBox = document.getElementById('txUploadPreview');
-  const previewImg = document.getElementById('txPreviewImg');
-  const form = document.getElementById('uploadTxForm');
-
-  fileInput?.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const maxDim = 1200;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > maxDim || height > maxDim) {
-          if (width > height) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          } else {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-
-        uploadedTxBase64 = canvas.toDataURL('image/jpeg', 0.88);
-
-        if (previewImg && previewBox) {
-          previewImg.src = uploadedTxBase64;
-          previewBox.style.display = 'block';
-        }
-      };
-      img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-
-  form?.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    if (!uploadedTxBase64) {
-      alert('Please select an image file first (screenshot of client conversation).');
-      return;
-    }
-
-    const title = document.getElementById('txNewTitle').value.trim();
-    const tag = document.getElementById('txNewTag').value.trim();
-    const status = document.getElementById('txNewStatus').value.trim();
-    const service = document.getElementById('txNewService').value.trim();
-    const caption = document.getElementById('txNewCaption').value.trim();
-
-    const newTx = {
-      id: `tx_${Date.now()}`,
-      title: title || 'Verified Client Conversation',
-      tag: tag || 'Chat DM • Verified',
-      status: status || 'Verified Chat ✓',
-      service: service || 'Academic Writing & Research',
-      caption: caption || 'Client confirmed prompt delivery and satisfaction.',
-      img: uploadedTxBase64
-    };
-
-    if (!currentData.transactions) currentData.transactions = [];
-    currentData.transactions.unshift(newTx);
-
-    saveStoreData(currentData);
-    renderTransactionsList();
-
-    form.reset();
-    uploadedTxBase64 = '';
-    if (previewBox) previewBox.style.display = 'none';
-
-    showToast('Proof of transaction uploaded & added to showcase! 🌸');
-  });
-}
 
 // --- Backup & Restore ---
 function initBackupManager() {
@@ -732,12 +612,8 @@ function initContactInfoManager() {
 
   // Save from modal
   document.getElementById('saveContactModalBtn')?.addEventListener('click', () => {
-    currentData.brand.email     = document.getElementById('modalContactEmail').value.trim();
-    currentData.brand.telegram  = document.getElementById('modalContactTelegram').value.trim();
     currentData.brand.instagram = document.getElementById('modalContactInstagram').value.trim();
-    currentData.brand.twitter   = document.getElementById('modalContactTwitter').value.trim();
     currentData.brand.facebook  = document.getElementById('modalContactFacebook').value.trim();
-    currentData.brand.phone     = document.getElementById('modalContactPhone').value.trim();
     saveStoreData(currentData);
     syncContactFormFields();
     renderContactPreview();
@@ -747,13 +623,10 @@ function initContactInfoManager() {
 
   // Save from inline form button
   document.getElementById('saveContactBtn')?.addEventListener('click', () => {
-    currentData.brand.email     = document.getElementById('contactEmail').value.trim();
-    currentData.brand.telegram  = document.getElementById('contactTelegram').value.trim();
     currentData.brand.instagram = document.getElementById('contactInstagram').value.trim();
-    currentData.brand.twitter   = document.getElementById('contactTwitter').value.trim();
     currentData.brand.facebook  = document.getElementById('contactFacebook').value.trim();
-    currentData.brand.phone     = document.getElementById('contactPhone').value.trim();
     saveStoreData(currentData);
+    syncContactFormFields();
     renderContactPreview();
     showToast('Contact info saved! ♡');
   });
@@ -773,22 +646,20 @@ function initContactInfoManager() {
 function syncContactFormFields() {
   const b = currentData.brand;
   const el = (id) => document.getElementById(id);
-  if(el('contactEmail'))     el('contactEmail').value     = b.email || '';
-  if(el('contactTelegram'))  el('contactTelegram').value  = b.telegram || '';
-  if(el('contactInstagram')) el('contactInstagram').value = b.instagram || '';
-  if(el('contactTwitter'))   el('contactTwitter').value   = b.twitter || '';
-  if(el('contactFacebook'))  el('contactFacebook').value  = b.facebook || '';
-  if(el('contactPhone'))     el('contactPhone').value     = b.phone || '';
+  if (el('contactInstagram')) el('contactInstagram').value = b.instagram || '';
+  if (el('contactFacebook'))  el('contactFacebook').value  = b.facebook || '';
+  if (el('brandInstagram'))   el('brandInstagram').value   = b.instagram || '';
+  if (el('brandFacebook'))    el('brandFacebook').value    = b.facebook || '';
 }
 
 function syncModalFromData() {
   const b = currentData.brand;
-  document.getElementById('modalContactEmail').value     = b.email || '';
-  document.getElementById('modalContactTelegram').value  = b.telegram || '';
-  document.getElementById('modalContactInstagram').value = b.instagram || '';
-  document.getElementById('modalContactTwitter').value   = b.twitter || '';
-  document.getElementById('modalContactFacebook').value  = b.facebook || '';
-  document.getElementById('modalContactPhone').value     = b.phone || '';
+  if (document.getElementById('modalContactInstagram')) {
+    document.getElementById('modalContactInstagram').value = b.instagram || '';
+  }
+  if (document.getElementById('modalContactFacebook')) {
+    document.getElementById('modalContactFacebook').value = b.facebook || '';
+  }
 }
 
 function renderContactPreview() {
@@ -796,15 +667,11 @@ function renderContactPreview() {
   if (!container) return;
   const b = currentData.brand;
   const items = [
-    { icon: '📧', label: 'Email', value: b.email || '—', href: b.email ? `mailto:${b.email}` : null },
-    { icon: '✈️', label: 'Telegram', value: b.telegram || '—', href: b.telegram || null },
     { icon: '📸', label: 'Instagram', value: b.instagram || '—', href: b.instagram || null },
-    { icon: '🐦', label: 'Twitter / X', value: b.twitter || '—', href: b.twitter || null },
-    { icon: '📘', label: 'Personal FB', value: b.facebook || '—', href: b.facebook || null },
-    { icon: '📱', label: 'Availability', value: b.phone || '—', href: null },
+    { icon: '📘', label: 'Facebook', value: b.facebook || '—', href: b.facebook || null },
   ];
   container.innerHTML = `
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 4px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; margin-bottom: 4px;">
       ${items.map(item => `
         <div style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 12px; padding: 16px 18px; display: flex; align-items: flex-start; gap: 12px;">
           <div style="font-size: 1.4rem; flex-shrink: 0; margin-top: 2px;">${item.icon}</div>

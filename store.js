@@ -16,12 +16,8 @@ const DEFAULT_STORE_DATA = {
     tagline: 'Academic Commissions Studio',
     heroTag: '🌸 Better Grades • Brighter Future • Less Academic Stress',
     heroDescription: "Struggling with tight deadlines, complex research papers, or demanding assignments? Soleil Comms provides high-caliber, confidential, and student-friendly academic assistance crafted strictly to your syllabus and professor's rubric.",
-    email: 'soleilcomms@gmail.com',
     instagram: 'https://instagram.com',
-    twitter: 'https://x.com',
-    telegram: 'https://t.me',
-    facebook: 'https://facebook.com/yourprofile',
-    phone: 'Available on DMs 24/7'
+    facebook: 'https://facebook.com'
   },
 
   // 3. Services & Base Rates (in PHP)
@@ -262,28 +258,6 @@ const DEFAULT_STORE_DATA = {
       tag: 'Verified Transaction • Bank Transfer',
       img: 'assets/proof_2.jpg'
     }
-  ],
-
-  // 9. Proof of Transaction (Client Chat Proofs)
-  transactions: [
-    {
-      id: 'tx-1',
-      title: 'Literature Synthesis & Turnitin Confirmation',
-      caption: 'Client confirmed receiving paper draft, passed with strict professor and 0% AI similarity.',
-      service: 'Academic Research Paper',
-      status: 'Verified High Score (A)',
-      tag: 'Instagram DM • Client Chat',
-      img: 'assets/tx_chat_1.jpg'
-    },
-    {
-      id: 'tx-2',
-      title: 'PowerPoint Deck Delivery & Feedback',
-      caption: 'Client praised the clean slide aesthetic, speaker notes, and fast turnaround for their report.',
-      service: 'Presentation Deck & Notes',
-      status: 'Delivered Early • 5/5 Stars',
-      tag: 'Chat DM • Verified Feedback',
-      img: 'assets/tx_chat_2.jpg'
-    }
   ]
 };
 
@@ -297,8 +271,7 @@ export function getStoreData() {
     return {
       ...DEFAULT_STORE_DATA,
       ...parsed,
-      proofs: (parsed.proofs && parsed.proofs.length > 0) ? parsed.proofs : DEFAULT_STORE_DATA.proofs,
-      transactions: (parsed.transactions && parsed.transactions.length > 0) ? parsed.transactions : DEFAULT_STORE_DATA.transactions
+      proofs: (parsed.proofs && parsed.proofs.length > 0) ? parsed.proofs : DEFAULT_STORE_DATA.proofs
     };
   } catch (err) {
     console.warn('Error reading from localStorage, using default data:', err);
@@ -308,9 +281,20 @@ export function getStoreData() {
 
 export function saveStoreData(newData) {
   try {
+    newData._updatedAt = Date.now();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
     // Dispatch an event for reactive updates in other tabs/windows
     window.dispatchEvent(new CustomEvent('soleil-store-updated', { detail: newData }));
+
+    // Sync to server API so mobile devices and other browsers immediately reflect changes
+    fetch('/api/store', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newData)
+    }).catch(err => {
+      console.warn('Could not sync store to server API:', err);
+    });
+
     return true;
   } catch (err) {
     console.error('Failed saving data to localStorage:', err);
@@ -320,6 +304,94 @@ export function saveStoreData(newData) {
 
 export function resetStoreData() {
   localStorage.removeItem(STORAGE_KEY);
-  window.dispatchEvent(new CustomEvent('soleil-store-updated', { detail: DEFAULT_STORE_DATA }));
-  return JSON.parse(JSON.stringify(DEFAULT_STORE_DATA));
+  const def = JSON.parse(JSON.stringify(DEFAULT_STORE_DATA));
+  def._updatedAt = Date.now();
+  window.dispatchEvent(new CustomEvent('soleil-store-updated', { detail: def }));
+  fetch('/api/store/reset', { method: 'POST' }).catch(() => {});
+  return def;
+}
+
+// Cross-device synchronization: fetch server store data and reconcile
+export async function syncStoreWithServer(callback) {
+  try {
+    const res = await fetch('/api/store', { cache: 'no-store' });
+    if (!res.ok) return null;
+    const serverData = await res.json();
+
+    const localRaw = localStorage.getItem(STORAGE_KEY);
+    const localData = localRaw ? JSON.parse(localRaw) : null;
+
+    if (serverData && serverData.brand && serverData.exists !== false) {
+      const serverTime = serverData._updatedAt || 0;
+      const localTime = localData?._updatedAt || 0;
+
+      // If local data exists and was modified more recently than the server
+      if (localData && localData.brand && localTime > serverTime) {
+        // Upload local edits to server so mobile devices receive them
+        await fetch('/api/store', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(localData)
+        });
+        if (callback) callback(localData);
+        return localData;
+      } else {
+        // Server data is newer or local is empty (e.g. mobile device accessing site)
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(serverData));
+        window.dispatchEvent(new CustomEvent('soleil-store-updated', { detail: serverData }));
+        if (callback) callback(serverData);
+        return serverData;
+      }
+    } else if (localData && localData.brand) {
+      // Server doesn't have custom data yet, but admin has local edits!
+      // Push local edits to server so mobile devices immediately reflect them
+      localData._updatedAt = Date.now();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(localData));
+      await fetch('/api/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(localData)
+      });
+      if (callback) callback(localData);
+      return localData;
+    }
+  } catch (err) {
+    console.warn('API store sync failed, continuing in local mode:', err);
+  }
+  return null;
+}
+
+// Light auto-sync for live viewers / mobile devices so changes appear automatically
+export function startStoreAutoSync(callback, intervalMs = 2500) {
+  const check = async () => {
+    try {
+      const res = await fetch('/api/store', { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data && data.brand && data.exists !== false) {
+        const currentLocalRaw = localStorage.getItem(STORAGE_KEY);
+        const currentLocal = currentLocalRaw ? JSON.parse(currentLocalRaw) : null;
+
+        // If server data has been updated
+        if (data._updatedAt && data._updatedAt !== (currentLocal?._updatedAt || 0)) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+          window.dispatchEvent(new CustomEvent('soleil-store-updated', { detail: data }));
+          if (callback) callback(data);
+        }
+      }
+    } catch (e) {
+      // Silent error during background polling
+    }
+  };
+
+  const timer = setInterval(check, intervalMs);
+
+  // Check immediately when user switches tabs or unlocks mobile device
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      check();
+    }
+  });
+
+  return () => clearInterval(timer);
 }
